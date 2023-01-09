@@ -45,10 +45,10 @@ def flex_thread(local_socket, client_info):
             print('THREAD: during packet decoding: ', res)
             continue
         packet_type = res['packet_type']
-        print(f"received packet: type={res['packet_type']}")
+        # print(f"received packet: type={res['packet_type']}")
 
-        if 'message' in res:
-            print(res['message'])
+        # if 'message' in res:
+        #     print(res['message'])
 
         if packet_type == PACKET_TYPE_PING:
             consumer.consume_flex_message(client_id, packet_type, res['message'])

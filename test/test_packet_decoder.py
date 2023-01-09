@@ -20,6 +20,7 @@ with open('test/VERSION_APPROVAL', mode="rb") as f:
     fields = res['fields']
     structure_length = res['structure_length']
     print(f'structure_length: {structure_length}')
+    print(fields)
 
 with open('test/PACKET_C', mode="rb") as f:
     data = f.read()

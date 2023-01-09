@@ -25,18 +25,19 @@ class Consumer:
         elif packet_type == PACKET_TYPE_APPROVAL:
             print('consumed PACKET_TYPE_APPROVAL')
         elif packet_type == PACKET_TYPE_A:
-            self.debug_message(client_id, message)
+            self.debug_message(client_id, packet_type, message)
         elif packet_type == PACKET_TYPE_C:
-            self.debug_message(client_id, message)
+            self.debug_message(client_id, packet_type, message)
         elif packet_type == PACKET_TYPE_T:
-            self.debug_message(client_id, message)
+            self.debug_message(client_id, packet_type, message)
 
     # Выводит отдельные поля сообщения в консоль
-    def debug_message(self, client_id: str, message: dict):
+    def debug_message(self, client_id: str, packet_type: str, message: dict):
         f = []
         for i in self.fields_to_show:
             if i in message:
                 f.append(message[i])
             else:
                 f.append('~')
-        print(client_id, '\t\t'.join(str(x) for x in f))
+        formatted_line = '\t'.join(str(x) for x in f)
+        print(f"{packet_type} {client_id} {formatted_line}")
