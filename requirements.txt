@@ -1,2 +1,6 @@
 paho-mqtt
 PySocks
+
+PyMySQL~=1.0.2
+requests~=2.27.1
+retrying~=1.3.4

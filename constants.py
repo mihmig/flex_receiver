@@ -16,11 +16,11 @@ PACKET_C_HEADER = b'~C'
 PACKET_T_HEADER = b'~T'
 
 # Первый пакет от устройства
-PACKET_TYPE_HANDSHAKE = 'HANDSHAKE'
+PACKET_TYPE_HANDSHAKE = 'h'
 # Пакет согласования версии протокола
-PACKET_TYPE_APPROVAL = 'APPROVAL'
+PACKET_TYPE_APPROVAL = 'a'
 # Пустой пакет поддержания канала связи
-PACKET_TYPE_PING = 'PING'
+PACKET_TYPE_PING = 'p'
 # Пакет с телеметрией
 PACKET_TYPE_A = 'A'
 # Пакет текущего состояния
@@ -28,7 +28,7 @@ PACKET_TYPE_C = 'C'
 # Пакет внеочередного сообщения
 PACKET_TYPE_T = 'T'
 # Ошибка разбора пакета
-PACKET_TYPE_ERROR = 'ERROR'
+PACKET_TYPE_ERROR = 'e'
 
 LOCAL_PORT = 21626
 REMOTE_SERVER = '193.193.165.165'

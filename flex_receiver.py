@@ -4,19 +4,17 @@
 import socket
 import sys
 import threading
-from datetime import datetime
+from logger import log
 from crc8_flex import crc8
 from config import config
 from consumer import Consumer
 
 from constants import *
 from packet_decoder import decode_packet, decode_flex_message
+from telegram import Sender
 
-consumer = Consumer(config)
-
-
-def log(line: str):
-    print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), ' ', line)
+sender = Sender(config['telegram'])
+consumer = Consumer(config, sender)
 
 
 def receive_from_socket(s):
@@ -31,52 +29,50 @@ def receive_from_socket(s):
 
 
 def flex_thread(local_socket, client_info):
-    client_id = ''
+    imei = ''
     fields = []
     structure_length = 0
     while True:
         data = receive_from_socket(local_socket)
         if not data:
-            print(f'THREAD: client: {client_info} disconnected')
+            log(f'THREAD: client: {client_info} disconnected')
             break
         # Обработка пакетов
         res = decode_packet(data)
         if 'packet_type' not in res:
-            print('THREAD: during packet decoding: ', res)
+            log(f"THREAD: during packet decoding: {res['message']}")
             continue
         packet_type = res['packet_type']
-        # print(f"received packet: type={res['packet_type']}")
-
-        # if 'message' in res:
-        #     print(res['message'])
 
         if packet_type == PACKET_TYPE_PING:
-            consumer.consume_flex_message(client_id, packet_type, res['message'])
+            consumer.consume_flex_message(imei, packet_type, None, None)
         elif packet_type == PACKET_TYPE_A:
             local_socket.send(data[0:3] + crc8(data[0:3]).to_bytes(1, "little"))
             records_count = res['records_count']
             payload = res['payload']
             for i in range(records_count):
-                message = decode_flex_message(fields, payload[i * structure_length: (i + 1) * structure_length])
-                consumer.consume_flex_message(client_id, packet_type, message)
+                packet_data = payload[i * structure_length: (i + 1) * structure_length]
+                message = decode_flex_message(fields, packet_data)
+                consumer.consume_flex_message(imei, packet_type, packet_data, message)
         elif packet_type == PACKET_TYPE_C:
             local_socket.send(PACKET_C_ANSWER)
             message = decode_flex_message(fields, res['payload'])
-            consumer.consume_flex_message(client_id, packet_type, message)
+            consumer.consume_flex_message(imei, packet_type, data, message)
         elif packet_type == PACKET_TYPE_T:
             local_socket.send(data[0:2] + crc8(data[0:6]).to_bytes(1, "little"))
             message = decode_flex_message(fields, res['payload'])
-            consumer.consume_flex_message(client_id, packet_type, message)
+            consumer.consume_flex_message(imei, packet_type, data, message)
         elif packet_type == PACKET_TYPE_HANDSHAKE:
             local_socket.send(HANDSHAKE_ANSWER)
-            client_id = res['client_id']
-            consumer.consume_flex_message(client_id, packet_type, None)
+            imei = res['imei']
+            consumer.consume_flex_message(imei, packet_type, data, res)
         elif packet_type == PACKET_TYPE_APPROVAL:
             fields = res['fields']
             structure_length = res['structure_length']
             local_socket.send(VERSION_APPROVAL_ANSWER)
-            continue
+            consumer.consume_flex_message(imei, packet_type, data, res)
         elif packet_type == PACKET_TYPE_ERROR:
+            consumer.consume_flex_message(imei, packet_type, data, res)
             local_socket.close()
             return
         else:

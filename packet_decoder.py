@@ -54,11 +54,11 @@ def decode_packet(data):
             'message': f'Packet T, length: {len(data)} bytes. Event index: {eventindex}'
         }
     elif len(data) > 20 and data[0:4] == NTCB_HEADER and data[16:20] == HANDSHAKE_HEADER:
-        client_id = data[20:].decode('ascii')
+        imei = data[20:].decode('ascii')
         return {
             'packet_type': PACKET_TYPE_HANDSHAKE,
-            'client_id': client_id,
-            'message': f'HANDSHAKE packet, client IMEI: {client_id}'
+            'imei': imei,
+            'message': f'HANDSHAKE packet, client IMEI: {imei}'
         }
     elif len(data) > 20 and data[0:4] == NTCB_HEADER and data[16:22] == FLEX_HEADER:
         error = None
