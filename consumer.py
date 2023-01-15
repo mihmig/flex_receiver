@@ -9,12 +9,13 @@ from telegram import Sender
 
 
 class Consumer:
-    def __init__(self, config: dict, sender: Sender):
+    def __init__(self, config: dict, storage: Storage, sender: Sender):
         self.config = config
         self.fields_to_show = config['fields_to_show']
-        self.storage = Storage(config)
+        self.storage = storage
         self.sender = sender
         self.chat_id = config['telegram']['chat_id']
+        self.default_timeout = config['default_timeout']
         # Кеш устройств
         self.devices = {}
 
@@ -34,19 +35,19 @@ class Consumer:
             if value < p['min_value'] and not p['triggered']:
                 self.storage.execute("UPDATE monitoring SET triggered = true WHERE id = %s", [id])
                 parameter_description = self.storage.get_parameter_description(parameter_id)
-                self.sender.send_message(p.get('chat_id') or self.chat_id['telegram']['chat_id'],
+                self.sender.send_message(p.get('chat_id') or self.chat_id,
                                          f"Значение параметра '{parameter_description}' ({value})"
                                          f" меньше допустимого {p['min_value']}")
             elif value > p['max_value'] and not p['triggered']:
                 self.storage.execute("UPDATE monitoring SET triggered = true WHERE id = %s", [id])
                 parameter_description = self.storage.get_parameter_description(parameter_id)
-                self.sender.send_message(p.get('chat_id') or self.chat_id['telegram']['chat_id'],
+                self.sender.send_message(p.get('chat_id') or self.chat_id,
                                          f"Значение параметра '{parameter_description}' ({value})"
                                          f" больше допустимого {p['max_value']}")
             else:
                 if p['triggered']:
                     parameter_description = self.storage.get_parameter_description(parameter_id)
-                    self.sender.send_message(p.get('chat_id') or self.config['telegram']['chat_id'],
+                    self.sender.send_message(p.get('chat_id') or self.chat_id,
                                              f"Значение параметра '{parameter_description}' ({value})"
                                              f" вернулось в норму")
                     # Параметр вернулся в норму (TODO предусмотреть гистерезис)

@@ -11,10 +11,14 @@ from consumer import Consumer
 
 from constants import *
 from packet_decoder import decode_packet, decode_flex_message
+from plugins.storage_mysql import Storage
 from telegram import Sender
+from timeout_checker import Checker
 
 sender = Sender(config['telegram'])
-consumer = Consumer(config, sender)
+storage = Storage(config)
+consumer = Consumer(config, storage, sender)
+checker = Checker(config, storage, sender)
 
 
 def receive_from_socket(s):
@@ -89,6 +93,7 @@ def main():
         log(e.strerror)
         sys.exit(5)
     flex_socket.listen(100)
+    threading.Thread(target=checker.check).start()
     try:
         while True:
             in_socket, in_addrinfo = flex_socket.accept()
