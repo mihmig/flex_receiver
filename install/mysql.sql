@@ -76,7 +76,8 @@ CREATE TABLE gnss.`monitoring`
     event_message VARCHAR(1024) COMMENT 'Сообщение при наступлении события',
     timeout INT COMMENT 'Таймаут не предоставления данных, сек.',
     alert bool NOT NULL DEFAULT FALSE COMMENT 'Уведомлять о наступлении события?',
-    triggered bool NOT NULL DEFAULT FALSE COMMENT 'Признак сработки условия',
+    triggered bool NOT NULL DEFAULT FALSE COMMENT 'Признак сработки условия выхода значения параметра за границы',
+    triggered_timeout bool NOT NULL DEFAULT FALSE COMMENT 'Признак сработки условия недоступности датчика',
     chat_id BIGINT COMMENT 'id телеграм-чата для отправки сообщений',
     PRIMARY KEY (`id`),
     UNIQUE (device_id, parameter_id)

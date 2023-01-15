@@ -18,8 +18,8 @@ class Checker():
     def check(self):
         while True:
             params = self.storage.get_data("SELECT id, parameter_id, event_id, min_value, max_value, `datetime`, "
-                                           "timeout, triggered, chat_id"
-                                           " FROM monitoring WHERE alert = true and triggered = false")
+                                           "timeout, triggered_timeout, chat_id"
+                                           " FROM monitoring WHERE alert = true and triggered_timeout = false")
             now = datetime.now()
             for p in params:
                 timeout = p.get('timeout') or config['default_timeout']
@@ -32,5 +32,5 @@ class Checker():
                     parameter_description = self.storage.get_parameter_description(p['parameter_id'])
                     self.sender.send_message(p.get('chat_id') or self.chat_id,
                                              f"Параметр '{parameter_description}' не поступал уже более {interval} с.")
-                    self.storage.execute("UPDATE monitoring SET triggered = true WHERE id = %s", [p['id']])
+                    self.storage.execute("UPDATE monitoring SET triggered_timeout = true WHERE id = %s", [p['id']])
             sleep(60)
