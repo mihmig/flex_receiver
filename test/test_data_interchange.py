@@ -20,14 +20,21 @@ with open('test/VERSION_APPROVAL', mode="rb") as f:
     answer = socket.recv(4096)
     print(f"received answer: {answer.hex(' ', 1)}")
 
-with open('test/PACKET_A_8_RECORDS', mode="rb") as f:
-    data = f.read()
-    print('sending PACKET_A_8_RECORDS')
-    socket.send(data)
-    answer = socket.recv(4096)
-    print(f"received answer: {answer.hex(' ', 1)}")
+# with open('test/PACKET_A_8_RECORDS', mode="rb") as f:
+#     data = f.read()
+#     print('sending PACKET_A_8_RECORDS')
+#     socket.send(data)
+#     answer = socket.recv(4096)
+#     print(f"received answer: {answer.hex(' ', 1)}")
+#
+# with open('test/PACKET_C', mode="rb") as f:
+#     data = f.read()
+#     print('sending PACKET_C')
+#     socket.send(data)
+#     answer = socket.recv(4096)
+#     print(f"received answer: {answer.hex(' ', 1)}")
 
-with open('test/PACKET_C', mode="rb") as f:
+with open('temp/data_17', mode="rb") as f:
     data = f.read()
     print('sending PACKET_C')
     socket.send(data)

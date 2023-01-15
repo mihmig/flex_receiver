@@ -18,13 +18,39 @@ class Consumer:
         # Кеш устройств
         self.devices = {}
 
-    # Обрабатывает полученные данные
-    # (выясняет - не вышел ли какой из параметров устройства за пределы)
+    # Контроль параметров на выход за установленные рамки и возвращение в норму
     def do_monitoring(self, device_id: int, decoded: dict):
-        params = self.storage.get_data("SELECT id, parameter_id, event_id, min_value, max_value, alert"
+        params = self.storage.get_data("SELECT id, parameter_id, event_id, min_value, max_value, `datetime`, timeout,"
+                                       " `alert`, triggered, chat_id"
                                        " FROM monitoring WHERE device_id = %s", [device_id])
-        for p in params.values():
-            pass
+        for p in params:
+            id = p['id']
+            parameter_id = p.get('parameter_id')
+            value = decoded.get(str(parameter_id))
+            if value is None:
+                continue  # В полученных данных нет данного параметра
+            self.storage.execute("UPDATE monitoring SET `datetime` = %s, current_value = %s WHERE id = %s",
+                                 [datetime.now(), value, id])
+            if value < p['min_value'] and not p['triggered']:
+                self.storage.execute("UPDATE monitoring SET triggered = true WHERE id = %s", [id])
+                parameter_description = self.storage.get_parameter_description(parameter_id)
+                self.sender.send_message(p.get('chat_id') or self.chat_id['telegram']['chat_id'],
+                                         f"Значение параметра '{parameter_description}' ({value})"
+                                         f" меньше допустимого {p['min_value']}")
+            elif value > p['max_value'] and not p['triggered']:
+                self.storage.execute("UPDATE monitoring SET triggered = true WHERE id = %s", [id])
+                parameter_description = self.storage.get_parameter_description(parameter_id)
+                self.sender.send_message(p.get('chat_id') or self.chat_id['telegram']['chat_id'],
+                                         f"Значение параметра '{parameter_description}' ({value})"
+                                         f" больше допустимого {p['max_value']}")
+            else:
+                if p['triggered']:
+                    parameter_description = self.storage.get_parameter_description(parameter_id)
+                    self.sender.send_message(p.get('chat_id') or self.config['telegram']['chat_id'],
+                                             f"Значение параметра '{parameter_description}' ({value})"
+                                             f" вернулось в норму")
+                    # Параметр вернулся в норму (TODO предусмотреть гистерезис)
+                    self.storage.execute("UPDATE monitoring SET triggered = false WHERE id = %s", [id])
 
     # Обрабатывает FLEX-сообщение
     def consume_flex_message(self, imei: str, packet_type: str, data: bytes | None, decoded: dict | None):
@@ -34,7 +60,7 @@ class Consumer:
         else:
             device_id, new = self.storage.get_device_id_by_imei(imei)
             if new:
-                self.sender.send_message(imei, self.chat_id, f"Новое устройство. IMEI={imei}")
+                self.sender.send_message(self.chat_id, f"Новое устройство. IMEI={imei}")
             self.devices[imei] = device_id
 
         if packet_type == PACKET_TYPE_PING:
@@ -53,16 +79,19 @@ class Consumer:
             event_id = decoded['2']
             event_time = decoded['3']
             self.storage.save_message(device_id, event_id, event_time, packet_type, data, json.dumps(decoded))
+            self.do_monitoring(device_id, decoded)
         elif packet_type == PACKET_TYPE_C:
             self.debug_message(imei, packet_type, decoded)
             event_id = decoded['2']
             event_time = decoded['3']
             self.storage.save_message(device_id, event_id, event_time, packet_type, data, json.dumps(decoded))
+            self.do_monitoring(device_id, decoded)
         elif packet_type == PACKET_TYPE_T:
             self.debug_message(imei, packet_type, decoded)
             event_id = decoded['2']
             event_time = decoded['3']
             self.storage.save_message(device_id, event_id, event_time, packet_type, data, json.dumps(decoded))
+            self.do_monitoring(device_id, decoded)
         elif packet_type == PACKET_TYPE_ERROR:
             self.storage.save_message(device_id, 0, now, packet_type, data, json.dumps(decoded))
         else:

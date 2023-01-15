@@ -77,6 +77,7 @@ CREATE TABLE gnss.`monitoring`
     timeout INT COMMENT 'Таймаут не предоставления данных, сек.',
     alert bool NOT NULL DEFAULT FALSE COMMENT 'Уведомлять о наступлении события?',
     triggered bool NOT NULL DEFAULT FALSE COMMENT 'Признак сработки условия',
+    chat_id BIGINT COMMENT 'id телеграм-чата для отправки сообщений',
     PRIMARY KEY (`id`),
     UNIQUE (device_id, parameter_id)
 ) ENGINE=InnoDB;

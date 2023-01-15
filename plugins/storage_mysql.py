@@ -7,14 +7,16 @@ class Storage(Db):
         Db.__init__(self, config['database'])
         self.config = config
         devices_count = self.get_value("SELECT count(1) FROM device")
-        print(f'found devices: {devices_count}')
 
-    def get_device_id_by_imei(self, imei: str) -> dict:
+    def get_device_id_by_imei(self, imei: str) -> tuple:
         device = self.get_value('SELECT id FROM device WHERE imei = %s', [imei])
         if device is not None:
-            return device, True
+            return device, False
         device_id = self.insert('INSERT INTO device (imei) VALUES (%s)', [imei])
-        return device_id, False
+        return device_id, True
+
+    def get_parameter_description(self, parameter_id: int):
+        return self.get_value("SELECT description FROM parameter WHERE id = %s", [parameter_id])
 
     def update_last_alive(self, device_id: int):
         self.execute('UPDATE device SET last_alive = NOW() WHERE id = %s', [device_id])
