@@ -73,7 +73,6 @@ class Consumer:
 
         if packet_type == PACKET_TYPE_PING:
             self.storage.update_last_alive(device_id)
-            self.storage.save_message(device_id, 0, now, packet_type, None, None)
             log(f'{imei}: consumed PING')
         elif packet_type == PACKET_TYPE_HANDSHAKE:
             self.storage.update_last_alive(device_id)
