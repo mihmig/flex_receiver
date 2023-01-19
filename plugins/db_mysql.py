@@ -67,6 +67,7 @@ class Db:
 
     # Выполнение произвольного запроса к БД
     def execute(self, query: str, params: list = None) -> object:
+        self.conn.ping(True)
         cursor = self.conn.cursor()
         result = cursor.execute(query, params)
         cursor.close()
@@ -75,6 +76,7 @@ class Db:
 
     # Вставка данных, возвращает сгенерированный id
     def insert(self, query: str, params: list = None) -> int:
+        self.conn.ping(True)
         cursor = self.conn.cursor()
         cursor.execute(query, params)
         insert_id = cursor.connection.insert_id()
