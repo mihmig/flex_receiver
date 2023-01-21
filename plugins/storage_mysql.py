@@ -1,7 +1,6 @@
 # Плагин. Хранилище устройств в БД MariaDb(Mysql)
 from plugins.db_mysql import Db
 
-
 class Storage(Db):
     def __init__(self, config: dict):
         Db.__init__(self, config['database'])
