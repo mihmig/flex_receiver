@@ -10,11 +10,17 @@ config = {
     # Список полей, отображаемых в отладочных сообщениях
     'fields_to_show' : ['1', '2', '3', '19', '20', '21', '45'],
     'storage' = mysql, # При отсутствии БД можно использовать storage = yaml (см. словарь devices ниже)
-    database = {
-        'dbname': 'gps',
-        'user': 'gps',
-        'password': 'gps',
+    'database': {
+        'database': 'gnss',
+        'user': 'gnss',
+        'password': 'gnss',
         'host': 'mysql.lan',
-        'port': 3306
+        'port': 3306,
+        'autocommit': True,
+        'size': 2,
+        'maxsize': 3,
+        'pre_create_num': 2,
+        'name': 'pool1',
+        'charset': 'utf8mb4'
     }
 }
