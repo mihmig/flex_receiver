@@ -13,6 +13,7 @@ from constants import *
 # г) Сообщение о разборе пакета (ошибка или информационное)
 from fields import flex_fields, decode_field
 
+digital_sensor_list = [45, 46, 47, 48, 49, 50, 51, 52]
 
 def decode_packet(data):
     if data[0:2] == PACKET_A_HEADER:
@@ -105,14 +106,21 @@ def get_structure_length(fields: list):
 
 
 # Декодирует FLEX-пакет с данными
-# struct - описание ожидаемой структуры пакета
+# fields - список ожидаемых полей пакета
 # data - двоичные данные FLEX-структуры
 # return - Словарь с декодированными данными {'1':'123', '2':'456'}
-def decode_flex_message(fields: list, data: str):
+def decode_flex_message(fields: list, data: str) -> dict:
     result = {}
     pointer = 0
     for f in fields:
         value = data[pointer:pointer + f['size']]
-        result[str(f['num'])] = decode_field(f, value)
+        # Специальная проверка на показания цифровых датчиков
+        # (если с прибора приходит -128 - значит датчик не подключен)
+        if f['num'] in digital_sensor_list:
+            if value != -128:
+                result[str(f['num'])] = decode_field(f, value)
+        else:
+            result[str(f['num'])] = decode_field(f, value)
+
         pointer += f['size']
     return result

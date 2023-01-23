@@ -16,7 +16,6 @@ class Consumer:
         self.sender = sender
         self.chat_id = config['telegram']['chat_id']
         self.default_timeout = config['default_timeout']
-        self.digital_sensors = [45, 46, 47, 48, 49, 50, 51, 52]
         # Кеш устройств
         self.devices = {}
 
@@ -37,11 +36,7 @@ class Consumer:
                 if not p['triggered']:
                     self.storage.execute("UPDATE monitoring SET triggered = true WHERE id = %s", [id])
                     parameter_description = self.storage.get_parameter_description(parameter_id)
-                    if parameter_id in self.digital_sensors and value == 128:
-                        self.sender.send_message(p.get('chat_id') or self.chat_id,
-                                                 f"Обрыв датчика '{parameter_description}' ({value})")
-                    else:
-                        self.sender.send_message(p.get('chat_id') or self.chat_id,
+                    self.sender.send_message(p.get('chat_id') or self.chat_id,
                                                  f"Значение параметра '{parameter_description}' ({value})"
                                                  f" меньше допустимого {p['min_value']}")
             elif value > p['max_value']:
