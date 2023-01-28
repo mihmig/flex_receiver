@@ -117,8 +117,9 @@ def decode_flex_message(fields: list, data: str) -> dict:
         # Специальная проверка на показания цифровых датчиков
         # (если с прибора приходит -128 - значит датчик не подключен)
         if f['num'] in digital_sensor_list:
+            value = decode_field(f, value)
             if value != -128:
-                result[str(f['num'])] = decode_field(f, value)
+                result[str(f['num'])] = value
         else:
             result[str(f['num'])] = decode_field(f, value)
 
