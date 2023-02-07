@@ -18,8 +18,9 @@ class Checker:
 
     def check(self):
         while True:
-            params = self.storage.get_data("SELECT id, parameter_id, event_id, min_value, max_value, `datetime`, "
-                                           "timeout, alert, triggered_timeout, chat_id"
+            params = self.storage.get_data("SELECT id, parameter_id, event_id, min_value, max_value, `datetime`,"
+                                           " timeout, no_data_message, data_resumption_message, alert,"
+                                           " triggered_timeout, chat_id"
                                            " FROM monitoring WHERE alert = true")
             now = datetime.now()
             for p in params:
@@ -34,15 +35,21 @@ class Checker:
                 if interval > timeout:
                     if p.get('triggered_timeout'):
                         continue
-                    parameter_description = self.storage.get_parameter_description(p['parameter_id'])
-                    self.sender.send_message(p.get('chat_id') or self.chat_id,
-                                             f"Параметр '{parameter_description}' не поступал уже более {interval} с.")
+                    if p.get('no_data_message'):
+                        message = p.get('no_data_message')
+                    else:
+                        parameter_description = self.storage.get_parameter_description(p['parameter_id'])
+                        message = f"Параметр '{parameter_description}' не поступал уже более {interval} с."
+                    self.sender.send_message(p.get('chat_id') or self.chat_id, message)
                     self.storage.execute("UPDATE monitoring SET triggered_timeout = true WHERE id = %s", [p['id']])
                 elif interval < 300:  # Параметр обновился не далее, как 5 минут назад
                     if not p.get('triggered_timeout'):
                         continue
-                    parameter_description = self.storage.get_parameter_description(p['parameter_id'])
-                    self.sender.send_message(p.get('chat_id') or self.chat_id,
-                                             f"Параметр '{parameter_description}' снова поступает")
+                    if p.get('data_resumption_message'):
+                        message = p.get('data_resumption_message')
+                    else:
+                        parameter_description = self.storage.get_parameter_description(p['parameter_id'])
+                        message = f"Параметр '{parameter_description}' снова поступает"
+                    self.sender.send_message(p.get('chat_id') or self.chat_id, message)
                     self.storage.execute("UPDATE monitoring SET triggered_timeout = false WHERE id = %s", [p['id']])
             sleep(60)

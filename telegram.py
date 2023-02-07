@@ -28,6 +28,7 @@ class Sender:
         j = response.json()
         if 'ok' not in j or 'result' not in j or 'message_id' not in j['result']:
             return
+        print(response.text)
 
     # Отправка сообщения в отдельном потоке, чтобы не задерживать основной
     def send_message(self, chat_id: int, text: str):
