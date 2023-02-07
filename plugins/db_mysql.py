@@ -25,6 +25,7 @@ class Db:
         cursor.execute(query, params)
         row = cursor.fetchone()
         cursor.close()
+        conn.close()
         return row
 
     # Получение одного столбца
