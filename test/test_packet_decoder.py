@@ -4,14 +4,22 @@ from consumer import Consumer
 from packet_decoder import decode_packet, decode_flex_message
 import pprint
 from config import config
+from plugins.storage_mysql import Storage
+from telegram import Sender
 
 pp = pprint.PrettyPrinter(compact=True)
-consumer = Consumer(config)
-
+sender = Sender(config['telegram'])
+storage = Storage(config)
+consumer = Consumer(config, storage, sender)
+# print(consumer)
+object_methods = [method_name for method_name in dir(consumer)
+                  if callable(getattr(consumer, method_name))]
+print(object_methods)
+exit(1)
 with open('test/HANDSHAKE_862531045630978', mode="rb") as f:
     data = f.read()
     res = decode_packet(data)
-    client_id = res['client_id']
+    imei = res['imei']
 
 with open('test/VERSION_APPROVAL', mode="rb") as f:
     data = f.read()
@@ -27,7 +35,7 @@ with open('test/PACKET_C', mode="rb") as f:
     res = decode_packet(data)
     print(res['message'])
     message = decode_flex_message(fields, res['payload'])
-    consumer.consume_flex_message(client_id, PACKET_TYPE_C, message)
+    consumer.consume_flex_message(imei, PACKET_TYPE_C, message)
     # print(s['1'], s['2'], s['3'], s['19'], s['20'], s['45'])
 
 with open('test/PACKET_A_8_RECORDS', mode="rb") as f:
@@ -38,6 +46,6 @@ with open('test/PACKET_A_8_RECORDS', mode="rb") as f:
     data = res['payload']
     for i in range(records_count):
         message = decode_flex_message(fields, data[i * structure_length: (i + 1) * structure_length])
-        consumer.consume_flex_message(client_id, PACKET_TYPE_A, message)
+        consumer.consume_flex_message(imei, PACKET_TYPE_A, message)
         # pp.pprint(s)
         # print(s['1'], s['2'], s['3'], s['19'], s['20'], s['45'])
