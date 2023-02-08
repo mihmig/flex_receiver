@@ -36,7 +36,7 @@ class Checker:
                     if p.get('triggered_timeout'):
                         continue
                     if p.get('no_data_message'):
-                        message = p.get('no_data_message')
+                        message = p.get('no_data_message').replace("%TIMEOUT%", str(timeout))
                     else:
                         parameter_description = self.storage.get_parameter_description(p['parameter_id'])
                         message = f"Параметр '{parameter_description}' не поступал уже более {interval} с."
