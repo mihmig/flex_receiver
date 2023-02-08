@@ -4,24 +4,72 @@
 from datetime import datetime
 from time import sleep
 
-from config import config
 from plugins.storage_mysql import Storage
 from telegram import Sender
 
 
+# Возвращает имя устройства
+def get_device_name(device: dict) -> str:
+    name = f"Устройство: id={device.get('id') or ''}, imei={device.get('imei') or ''}," \
+           f" name={device.get('name') or ''} ({device.get('comment') or ''})"
+    return name
+
+
 class Checker:
-    def __init__(self, config: dict, storage: Storage, sender: Sender):
-        self.config = config
-        self.sender = sender
-        self.chat_id = config['telegram']['chat_id']
-        self.storage = storage
+    def __init__(self, _config: dict, _storage: Storage, _sender: Sender):
+        self.config = _config
+        self.sender = _sender
+        self.chat_id = _config['telegram']['chat_id']
+        self.storage = _storage
 
     def check(self):
         while True:
-            params = self.storage.get_data("SELECT id, parameter_id, event_id, min_value, max_value, `datetime`,"
-                                           " timeout, no_data_message, data_resumption_message, alert,"
-                                           " triggered_timeout, chat_id"
-                                           " FROM monitoring WHERE alert = true")
+            # Устройства
+            devices = self.storage.get_data("""
+                SELECT id, imei, `name`, `comment`, last_alive, timeout, state, timeout_message, online_message, chat_id
+                FROM device 
+                WHERE state <> 'ERROR'
+                OR state IS NULL  
+                AND chat_id IS NOT NULL
+            """)
+            now = datetime.now()
+            for d in devices:
+                last_alive = d.get('last_alive')
+                if not last_alive:
+                    # Устройство ещё не подключалось
+                    continue
+                interval = round((now - last_alive).total_seconds())
+                if d.get('state') is None or d.get('state') == 'ONLINE':
+                    timeout = d.get('timeout') or self.config['device_default_timeout']
+                    if interval > timeout:
+                        chat_id = d.get('chat_id') or self.chat_id
+                        if d.get('timeout_message'):
+                            message = d.get('timeout_message')
+                        else:
+                            message = f"{get_device_name(d)} не выходило на связь {interval} с."
+                        self.sender.send_message(chat_id, message)
+                        self.storage.execute("UPDATE device SET state = %s WHERE id = %s", ['OFFLINE', d['id']])
+                    elif d.get('state') is None:
+                        self.storage.execute("UPDATE device SET state = %s WHERE id = %s", ['ONLINE', d['id']])
+                elif d.get('state') == "OFFLINE":
+                    # Устройство выходило на связь не далее, как 5 минут назад
+                    if interval < 300:
+                        chat_id = d.get('chat_id') or self.chat_id
+                        if d.get('online_message'):
+                            message = d.get('online_message')
+                        else:
+                            message = f"{get_device_name(d)} снова онлайн!"
+                        self.sender.send_message(chat_id, message)
+                        self.storage.execute("UPDATE device SET state = %s WHERE id = %s", ['ONLINE', d['id']])
+
+            # Параметры
+            params = self.storage.get_data("""
+               SELECT id, parameter_id, event_id, min_value, max_value, `datetime`,
+               timeout, no_data_message, data_resumption_message, alert,
+               triggered_timeout, chat_id
+               FROM monitoring
+               WHERE alert = true
+            """)
             now = datetime.now()
             for p in params:
                 if not p.get('alert'):
@@ -31,7 +79,7 @@ class Checker:
                 if not last_data:
                     continue  # Параметр ещё никогда не появлялся
                 interval = round((now - last_data).total_seconds())
-                timeout = p.get('timeout') or config['default_timeout']
+                timeout = p.get('timeout') or self.config['sensor_default_timeout']
                 if interval > timeout:
                     if p.get('triggered_timeout'):
                         continue
@@ -53,3 +101,12 @@ class Checker:
                     self.sender.send_message(p.get('chat_id') or self.chat_id, message)
                     self.storage.execute("UPDATE monitoring SET triggered_timeout = false WHERE id = %s", [p['id']])
             sleep(60)
+
+
+if __name__ == '__main__':
+    from config import config
+
+    sender = Sender(config['telegram'])
+    storage = Storage(config)
+    checker = Checker(config, storage, sender)
+    checker.check()

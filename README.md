@@ -10,6 +10,9 @@
     mysqlimport --local --fields-terminated-by=";" --lines-terminated-by="\r\n" -d -v gnss parameter.csv
     ```
 
+### Документация
+* https://www.navtelecom.ru/ru/tekhnicheskaya-podderzhka/razrabotchikam-programmnogo-obespecheniya
+
 ### Настройка архивации
 * crontab -e
 ``` bash

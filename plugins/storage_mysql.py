@@ -18,7 +18,7 @@ class Storage(Db):
         return self.get_value("SELECT description FROM parameter WHERE id = %s", [parameter_id])
 
     def update_last_alive(self, device_id: int):
-        self.execute('UPDATE device SET last_alive = NOW() WHERE id = %s', [device_id])
+        self.execute("UPDATE device SET last_alive = NOW() WHERE id = %s", [device_id])
 
     def save_message(self, device_id: int, event_id: int, datetime: str,
                      message_type: str, data:bytes | None, decoded: str | None):
