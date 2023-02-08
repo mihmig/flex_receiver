@@ -21,7 +21,6 @@ class Consumer:
 
     # Контроль параметров на выход за установленные рамки и возвращение в норму
     def do_monitoring(self, device_id: int, decoded: dict):
-        device_info = self.storage.get_line("SELECT name, comment FROM device WHERE id = %s", [device_id])
         params = self.storage.get_data("SELECT id, parameter_id, event_id, min_value, max_value, `datetime`, timeout,"
                                        " below_min_message, above_max_message, "
                                        " `alert`, triggered, chat_id"
