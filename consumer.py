@@ -21,6 +21,11 @@ class Consumer:
 
     # Контроль параметров на выход за установленные рамки и возвращение в норму
     def do_monitoring(self, device_id: int, decoded: dict):
+        # На архивные события (старше 10 минут не реагируем)
+        event_moment = datetime.strptime(decoded.get('9'), "%Y-%m-%d %H:%M:%S");
+        if int(datetime.now() - event_moment) > 600:
+            return
+
         params = self.storage.get_data("SELECT id, parameter_id, event_id, min_value, max_value, `datetime`, timeout,"
                                        " below_min_message, above_max_message, in_range_message "
                                        " `alert`, triggered, chat_id"
