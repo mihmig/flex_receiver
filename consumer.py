@@ -22,7 +22,7 @@ class Consumer:
     # Контроль параметров на выход за установленные рамки и возвращение в норму
     def do_monitoring(self, device_id: int, decoded: dict):
         params = self.storage.get_data("SELECT id, parameter_id, event_id, min_value, max_value, `datetime`, timeout,"
-                                       " below_min_message, above_max_message, "
+                                       " below_min_message, above_max_message, in_range_message "
                                        " `alert`, triggered, chat_id"
                                        " FROM monitoring WHERE device_id = %s", [device_id])
         for p in params:
@@ -89,18 +89,21 @@ class Consumer:
             self.storage.save_message(device_id, 0, now, packet_type, data, None)
             log('consumed PACKET_TYPE_APPROVAL')
         elif packet_type == PACKET_TYPE_A:
+            self.storage.update_last_alive(device_id)
             self.debug_message(imei, packet_type, decoded)
             event_id = decoded['2']
             event_time = decoded['3']
             self.storage.save_message(device_id, event_id, event_time, packet_type, data, json.dumps(decoded))
             self.do_monitoring(device_id, decoded)
         elif packet_type == PACKET_TYPE_C:
+            self.storage.update_last_alive(device_id)
             self.debug_message(imei, packet_type, decoded)
             event_id = decoded['2']
             event_time = decoded['3']
             self.storage.save_message(device_id, event_id, event_time, packet_type, data, json.dumps(decoded))
             self.do_monitoring(device_id, decoded)
         elif packet_type == PACKET_TYPE_T:
+            self.storage.update_last_alive(device_id)
             self.debug_message(imei, packet_type, decoded)
             event_id = decoded['2']
             event_time = decoded['3']
