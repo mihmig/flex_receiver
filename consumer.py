@@ -1,8 +1,7 @@
 # Модуль хранения пакетов данных
 import json
 from datetime import datetime
-from constants import PACKET_TYPE_PING, PACKET_TYPE_A, PACKET_TYPE_C, PACKET_TYPE_HANDSHAKE, PACKET_TYPE_APPROVAL, \
-    PACKET_TYPE_T, PACKET_TYPE_ERROR
+from constants import *
 from plugins.storage_mysql import Storage
 from logger import log
 from telegram import Sender
@@ -20,12 +19,8 @@ class Consumer:
 
     # Контроль параметров на выход за установленные рамки и возвращение в норму
     def do_monitoring(self, device_id: int, packet_type: str, decoded: dict):
-        # На архивные события старше 10 минут не реагируем
-        if packet_type == PACKET_TYPE_A:
-            event_moment = datetime.strptime(decoded.get('9'), "%Y-%m-%d %H:%M:%S")
-            if int((datetime.now() - event_moment).total_seconds()) > 600:
-                return
-
+        moment_str = decoded.get(EVENT_TIME_FIELD)
+        moment = datetime.strptime(moment_str, "%Y-%m-%d %H:%M:%S")
         params = self.storage.get_data("SELECT id, parameter_id, event_id, min_value, max_value, `datetime`, timeout,"
                                        " below_min_message, above_max_message, in_range_message, "
                                        " `alert`, triggered, chat_id"
@@ -37,7 +32,7 @@ class Consumer:
             if value is None:
                 continue  # В полученных данных нет данного параметра
             self.storage.execute("UPDATE monitoring SET `datetime` = %s, current_value = %s WHERE id = %s",
-                                 [datetime.now(), value, id])
+                                 [moment, value, id])
 
             # Проверки на выход параметра за пределы и возврат в норму
             if value < p['min_value']:
@@ -45,11 +40,13 @@ class Consumer:
                     self.storage.execute("UPDATE monitoring SET triggered = true WHERE id = %s", [id])
                     if p.get('alert'):
                         if p['below_min_message']:
-                            message = p['below_min_message'].replace("%VALUE%", str(value))
+                            message = p['below_min_message'].replace("%VALUE%", str(value)) \
+                                .replace("%MOMENT%", str(moment_str))
                         else:
                             parameter_description = self.storage.get_parameter_description(parameter_id)
-                            message = f"Значение параметра '{parameter_description}' ({value})" \
-                                      f" меньше допустимого {p['min_value']}"
+                            message = f"Значение параметра '{parameter_description}' " \
+                                      f"на {moment_str} ({value}) " \
+                                      f"меньше допустимого {p['min_value']}"
                         self.sender.send_message(p.get('chat_id') or self.chat_id, message)
 
             elif value > p['max_value']:
@@ -57,11 +54,13 @@ class Consumer:
                     self.storage.execute("UPDATE monitoring SET triggered = true WHERE id = %s", [id])
                     if p.get('alert'):
                         if p['above_max_message']:
-                            message = p['above_max_message'].replace("%VALUE%", str(value))
+                            message = p['above_max_message'].replace("%VALUE%", str(value)) \
+                                .replace("%MOMENT%", str(moment_str))
                         else:
                             parameter_description = self.storage.get_parameter_description(parameter_id)
-                            message = f"Значение параметра '{parameter_description}' ({value})" \
-                                      f" больше допустимого {p['max_value']}"
+                            message = f"Значение параметра '{parameter_description}' " \
+                                      f"на {moment_str} ({value}) " \
+                                      f"больше допустимого {p['max_value']}"
                         self.sender.send_message(p.get('chat_id') or self.chat_id, message)
             else:
                 if p['triggered']:
@@ -69,10 +68,12 @@ class Consumer:
                     self.storage.execute("UPDATE monitoring SET triggered = false WHERE id = %s", [id])
                     if p.get('alert'):
                         if p.get('in_range_message'):
-                            message = p['in_range_message'].replace("%VALUE%", str(value))
+                            message = p['in_range_message'].replace("%VALUE%", str(value)) \
+                                .replace("%MOMENT%", str(moment_str))
                         else:
                             parameter_description = self.storage.get_parameter_description(parameter_id)
-                            message = f"Значение параметра '{parameter_description}' ({value}) вернулось в норму"
+                            message = f"Значение параметра '{parameter_description}' " \
+                                      f"на {moment_str} ({value}) вернулось в норму"
                         self.sender.send_message(p.get('chat_id') or self.chat_id, message)
 
     # Обрабатывает FLEX-сообщение

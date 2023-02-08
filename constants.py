@@ -29,5 +29,6 @@ PACKET_TYPE_C = 'C'
 PACKET_TYPE_T = 'T'
 # Ошибка разбора пакета
 PACKET_TYPE_ERROR = 'e'
-
+# Поле "Время события"
+EVENT_TIME_FIELD = '3'
 LOCAL_PORT = 21626
