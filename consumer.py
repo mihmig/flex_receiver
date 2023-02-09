@@ -18,13 +18,14 @@ class Consumer:
         self.devices = {}
 
     # Контроль параметров на выход за установленные рамки и возвращение в норму
-    def do_monitoring(self, device_id: int, packet_type: str, decoded: dict):
+    def do_monitoring(self, device_id: int, decoded: dict):
         moment_str = decoded.get(EVENT_TIME_FIELD)
         moment = datetime.strptime(moment_str, "%Y-%m-%d %H:%M:%S")
         params = self.storage.get_data("SELECT id, parameter_id, event_id, min_value, max_value, `datetime`, timeout,"
                                        " below_min_message, above_max_message, in_range_message, "
                                        " `alert`, triggered, chat_id"
                                        " FROM monitoring WHERE device_id = %s", [device_id])
+        now = datetime.now()
         for p in params:
             id = p['id']
             parameter_id = p.get('parameter_id')
@@ -32,7 +33,7 @@ class Consumer:
             if value is None:
                 continue  # В полученных данных нет данного параметра
             self.storage.execute("UPDATE monitoring SET `datetime` = %s, current_value = %s WHERE id = %s",
-                                 [moment, value, id])
+                                 [now, value, id])
 
             # Проверки на выход параметра за пределы и возврат в норму
             if value < p['min_value']:
@@ -103,7 +104,7 @@ class Consumer:
             event_id = decoded['2']
             event_time = decoded['3']
             self.storage.save_message(device_id, event_id, event_time, packet_type, data, json.dumps(decoded))
-            self.do_monitoring(device_id, packet_type, decoded)
+            self.do_monitoring(device_id, decoded)
         elif packet_type == PACKET_TYPE_ERROR:
             self.storage.save_message(device_id, 0, now, packet_type, data, json.dumps(decoded))
         else:

@@ -84,13 +84,13 @@ class Checker:
                     if p.get('triggered_timeout'):
                         continue
                     if p.get('no_data_message'):
-                        message = p.get('no_data_message').replace("%TIMEOUT%", str(timeout))
+                        message = p.get('no_data_message').replace("%TIMEOUT%", str(timeout // 60))
                     else:
                         parameter_description = self.storage.get_parameter_description(p['parameter_id'])
-                        message = f"Параметр '{parameter_description}' не поступал уже более {interval} с."
+                        message = f"Параметр '{parameter_description}' не поступал уже более {interval // 60} мин."
                     self.sender.send_message(p.get('chat_id') or self.chat_id, message)
                     self.storage.execute("UPDATE monitoring SET triggered_timeout = true WHERE id = %s", [p['id']])
-                elif interval < 300:  # Параметр обновился не далее, как 5 минут назад
+                else:
                     if not p.get('triggered_timeout'):
                         continue
                     if p.get('data_resumption_message'):
