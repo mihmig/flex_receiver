@@ -59,4 +59,4 @@ final_message += info + '\n'
 if alert:
     disable_notification = False
 
-sender.send_message(chat_id, final_message, disable_notification)
+sender.send_message(chat_id, final_message, True)
