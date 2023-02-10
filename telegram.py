@@ -16,10 +16,11 @@ class Sender:
 
     # Отправка сообщения в Телеграм-чат.
     @retry(retry_on_exception=retry_if_io_error, wait_exponential_multiplier=1000, wait_exponential_max=10000)
-    def send_message_with_retry(self,chat_id: int, text: str):
+    def send_message_with_retry(self, chat_id: int, text: str, disable_notification=False):
         request = {
             'chat_id': chat_id,
-            'text': text
+            'text': text,
+            'disable_notification': disable_notification
         }
         response = requests.post('https://api.telegram.org/bot' + self.bot_token + '/sendMessage', json=request)
         if response.status_code != 200:
@@ -31,6 +32,5 @@ class Sender:
         print(response.text)
 
     # Отправка сообщения в отдельном потоке, чтобы не задерживать основной
-    def send_message(self, chat_id: int, text: str):
-        Thread(target=self.send_message_with_retry, args=(chat_id, text,)).start()
-
+    def send_message(self, chat_id: int, text: str, disable_notification=False):
+        Thread(target=self.send_message_with_retry, args=(chat_id, text, disable_notification)).start()
