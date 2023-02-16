@@ -16,7 +16,7 @@ class Sender:
 
     # Отправка сообщения в Телеграм-чат.
     @retry(retry_on_exception=retry_if_io_error, wait_exponential_multiplier=1000, wait_exponential_max=10000)
-    def send_message_with_retry(self, chat_id: int, text: str, disable_notification=False):
+    def send_message_with_retry(self, chat_id: int, text: str, disable_notification=False) -> int:
         request = {
             'chat_id': chat_id,
             'text': text,
@@ -30,7 +30,16 @@ class Sender:
         if 'ok' not in j or 'result' not in j or 'message_id' not in j['result']:
             return
         print(response.text)
+        return j['result']['message_id']
 
     # Отправка сообщения в отдельном потоке, чтобы не задерживать основной
     def send_message(self, chat_id: int, text: str, disable_notification=False):
         Thread(target=self.send_message_with_retry, args=(chat_id, text, disable_notification)).start()
+
+    def delete_message(self, chat_id: int, message_id: int):
+        request = {
+            'chat_id': chat_id,
+            'message_id': message_id
+        }
+        response = requests.post('https://api.telegram.org/bot' + self.bot_token + '/deleteMessage', json=request)
+        print(response.text)
