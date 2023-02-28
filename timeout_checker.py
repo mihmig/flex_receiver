@@ -32,6 +32,8 @@ class Checker:
                 OR state IS NULL  
                 AND chat_id IS NOT NULL
             """)
+            # Статус устройств
+            device_states = {}
             now = datetime.now()
             for d in devices:
                 last_alive = d.get('last_alive')
@@ -61,10 +63,10 @@ class Checker:
                             message = f"{get_device_name(d)} снова онлайн!"
                         self.sender.send_message(chat_id, message)
                         self.storage.execute("UPDATE device SET state = %s WHERE id = %s", ['ONLINE', d['id']])
-
+                device_states[d.get('id')] = self.storage.get_value("SELECT state FROM device WHERE id = %s", [d['id']])
             # Параметры
             params = self.storage.get_data("""
-               SELECT id, parameter_id, event_id, min_value, max_value, `datetime`,
+               SELECT id, device_id, parameter_id, event_id, min_value, max_value, `datetime`,
                timeout, no_data_message, data_resumption_message, alert,
                triggered_timeout, chat_id
                FROM monitoring
@@ -72,6 +74,8 @@ class Checker:
             """)
             now = datetime.now()
             for p in params:
+                if device_states.get(p['device_id']) != 'ONLINE':
+                    continue # Для оффлайн-устройств отслеживание параметров не имеет смысла
                 if not p.get('alert'):
                     continue  # Параметр отслеживать не нужно
                 # Проверяем - давно ли появлялся такой параметр
