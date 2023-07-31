@@ -12,7 +12,8 @@ from telegram import Sender
 sender = Sender(config['telegram'])
 storage = Storage(config)
 
-chat_id = -1001882219961
+# chat_id = -1001882219961
+chat_id = 47254369
 final_message = "Текущее состояние системы охлаждения аквариума:\n"
 
 device_id = 4
@@ -51,7 +52,7 @@ final_message += info + '\n'
 if alert:
     disable_notification = False
 
-info, alert = get_param_state_and_info(51, {'normal': '🟢 Внешнее питание терминала в норме',
+info, alert = get_param_state_and_info(19, {'normal': '🟢 Внешнее питание терминала в норме',
                                      'below': '🔴 Внешнее питание терминала ниже нормы',
                                      'above': '🔴 Внешнее питание терминала выше нормы',
                                                })
