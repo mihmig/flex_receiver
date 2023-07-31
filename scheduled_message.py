@@ -12,8 +12,7 @@ from telegram import Sender
 sender = Sender(config['telegram'])
 storage = Storage(config)
 
-# chat_id = -1001882219961
-chat_id = 47254369
+chat_id = config['telegram']['chat_id']
 final_message = "Текущее состояние системы охлаждения аквариума:\n"
 
 device_id = 4
