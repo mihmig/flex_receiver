@@ -2,10 +2,14 @@
 
 ### Установка
 * Установка зависимостей (библиотек python)
+  python3 -m pip install --upgrade pip
   pip install -r requirements.txt
 * Загрузка справочников:
 * MariaDB (MySql):
     ``` bash
+    mysql
+    usq mysql
+    select host, user, password from user;
     mysqlimport --local --fields-terminated-by=";" --lines-terminated-by="\r\n" -d -v gnss event.csv
     mysqlimport --local --fields-terminated-by=";" --lines-terminated-by="\r\n" -d -v gnss parameter.csv
     ```
@@ -39,10 +43,14 @@ Restart=always
 WantedBy=multi-user.target
 ```
 ``` bash
+systemctl daemon-reload
 systemctl start flex_receiver
 systemctl status flex_receiver
 systemctl stop flex_receiver
 journalctl -u flex_receiver.service -f -n 50
+
+PYTHONPATH=/projects/flex_receiver/ /usr/local/bin/python3.10 test/test_telegram.py
+PYTHONPATH=/projects/flex_receiver/ /usr/local/bin/python3.10 test/test_telegram.py
 ```
 
 ### Настройка архивации
