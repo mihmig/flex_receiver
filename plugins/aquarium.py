@@ -1,5 +1,4 @@
-# Отправка текущего состояния параметров аквариума.
-# в 10 и в 20 часов регулярно выплевывать:
+# Отправка текущего состояния параметров аквариума в 10 и в 20 часов.
 #
 # Текущее состояние системы охлаждения аквариума:
 # 🟢 Температура воды (подача): 9 °C
@@ -18,23 +17,25 @@ from plugins.telegram import Sender
 
 
 class Aquarium:
-    def __init__(self, config: dict, storage: Storage, sender: Sender):
-        self.config = config
-        self.sender = sender
-        self.storage = storage
-        self.chat_id = config['telegram']['chat_id']
+    def __init__(self, p_config: dict, p_storage: Storage, p_sender: Sender):
+        self.config = p_config
+        self.sender = p_sender
+        self.storage = p_storage
+        self.chat_id = p_config['telegram']['chat_id']
         self.final_message = "Текущее состояние системы охлаждения аквариума:\n"
         self.device_id = 4
 
     # Возвращает состояние параметра в человекочитаемом виде
     # и необходимость внимания (True - требует внимания, False - норма)
     def get_param_state_and_alert(self, parameter_id: int, messages: dict) -> (str, bool):
-        p = storage.get_line("SELECT id, parameter_id, event_id, current_value, min_value, max_value,"
-                             " `datetime`, timeout, no_data_message,"
-                             " below_min_message, above_max_message, "
-                             " `alert`, triggered, chat_id"
-                             " FROM monitoring WHERE device_id = %s AND parameter_id = %s",
-                             [self.device_id, parameter_id])
+        p = self.storage.get_line("""
+            SELECT id, parameter_id, event_id, current_value, min_value, max_value,
+                 `datetime`, timeout, no_data_message,
+                 below_min_message, above_max_message, 
+                 `alert`, triggered, chat_id
+                 FROM monitoring WHERE device_id = %s AND parameter_id = %s
+                 """,
+                                  [self.device_id, parameter_id])
 
         timeout = 3600 if p['timeout'] is None else p['timeout']
         no_data_message = 'Нет данных длительное время' if p['no_data_message'] is None else p['no_data_message']

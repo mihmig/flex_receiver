@@ -98,7 +98,7 @@ def main():
         sys.exit(5)
     flex_socket.listen(100)
     threading.Thread(target=checker.check).start()
-    aquarium = Aquarium(config, storage, sender);
+    aquarium = Aquarium(config, storage, sender)
     threading.Thread(target=aquarium.run_test()).start()
     try:
         while True:
