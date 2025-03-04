@@ -15,6 +15,7 @@ from fields import flex_fields, decode_field
 
 digital_sensor_list = [45, 46, 47, 48, 49, 50, 51, 52]
 
+
 def decode_packet(data):
     if data[0:2] == PACKET_A_HEADER:
         # Массив телеметрических сообщений.
@@ -55,7 +56,7 @@ def decode_packet(data):
             'message': f'Packet T, length: {len(data)} bytes. Event index: {eventindex}'
         }
     elif len(data) > 20 and data[0:4] == NTCB_HEADER and data[16:20] == HANDSHAKE_HEADER:
-        imei = data[20:].decode('ascii')
+        imei = data[20:35].decode('ascii')
         return {
             'packet_type': PACKET_TYPE_HANDSHAKE,
             'imei': imei,

@@ -13,6 +13,13 @@
     mysqlimport --local --fields-terminated-by=";" --lines-terminated-by="\r\n" -d -v gnss event.csv
     mysqlimport --local --fields-terminated-by=";" --lines-terminated-by="\r\n" -d -v gnss parameter.csv
     ```
+### Установка в докере
+
+* git clone git@github.com:mihmig/flex_receiver.git cd /opt/flex_receiver
+* cd /opt/flex_receiver
+
+### При запуске на Centos/Almalinux нужно открыть порт firewall-а
+firewall-cmd --permanent --add-port=21626/udp
 
 ### Документация к трекеру
 * https://www.navtelecom.ru/ru/tekhnicheskaya-podderzhka/razrabotchikam-programmnogo-obespecheniya
@@ -58,6 +65,15 @@ PYTHONPATH=/projects/flex_receiver/ /usr/local/bin/python3.10 test/test_telegram
 ``` bash
   20 4 * * 1-7 mysqldump gnss|gzip -c|ssh 172.22.220.55 "cat >/backup/gnss/db_`date "+%Y-%m-%d_%H%M%S"`.gz"
 ```
+
+### Запуск в докере
+docker up --build flex
+
+### Архивация и восстановление БД в докере
+
+* docker exec flex-db /bin/bash -c 'mariadb-dump gnss -p$MYSQL_ROOT_PASSWORD >/backup/gnss.sql'
+* Для windows 
+  * docker exec flex-db /bin/bash -c "mariadb gnss -p$MYSQL_ROOT_PASSWORD </backup/gnss.sql"
 
 ### Настройка периодической отправки статуса
 * crontab -e

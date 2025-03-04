@@ -1,9 +1,9 @@
 # Тест контроля параметров на выход за установленные рамки и возвращение в норму
 from datetime import datetime
 
-from config import config
+from data.config import config
 from plugins.storage_mysql import Storage
-from telegram import Sender
+from plugins.telegram import Sender
 
 storage = Storage(config)
 sender = Sender(config['telegram'])

@@ -1,5 +1,9 @@
 .idea/
 __pycache__/
-data/*
-config.py
-docker/config/mariadb/data/*
+!backup/.placeholder
+backup/*
+!db_data/.placeholder
+db_data/*
+config/config.yml
+venv
+.venv
