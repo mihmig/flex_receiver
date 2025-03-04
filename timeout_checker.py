@@ -4,8 +4,10 @@
 from datetime import datetime
 from time import sleep
 
+import yaml
+
 from plugins.storage_mysql import Storage
-from telegram import Sender
+from plugins.telegram import Sender
 
 
 # Возвращает имя устройства
@@ -108,7 +110,8 @@ class Checker:
 
 
 if __name__ == '__main__':
-    from config import config
+    with open('config/config.yml', "r", encoding="utf-8") as stream:
+        config = yaml.safe_load(stream)
 
     sender = Sender(config['telegram'])
     storage = Storage(config)

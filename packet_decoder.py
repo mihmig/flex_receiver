@@ -15,6 +15,7 @@ from fields import flex_fields, decode_field
 
 digital_sensor_list = [45, 46, 47, 48, 49, 50, 51, 52]
 
+
 def decode_packet(data):
     if data[0:2] == PACKET_A_HEADER:
         # Массив телеметрических сообщений.

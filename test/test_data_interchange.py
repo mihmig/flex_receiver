@@ -1,6 +1,5 @@
 # Тестирование цикла обмена данными
 import socket
-import sys
 
 from constants import LOCAL_PORT
 
@@ -34,9 +33,9 @@ with open('test/VERSION_APPROVAL', mode="rb") as f:
 #     answer = socket.recv(4096)
 #     print(f"received answer: {answer.hex(' ', 1)}")
 
-with open('temp/data_17', mode="rb") as f:
-    data = f.read()
-    print('sending PACKET_C')
-    socket.send(data)
-    answer = socket.recv(4096)
-    print(f"received answer: {answer.hex(' ', 1)}")
+# with open('temp/data_17', mode="rb") as f:
+#     data = f.read()
+#     print('sending PACKET_C')
+#     socket.send(data)
+#     answer = socket.recv(4096)
+#     print(f"received answer: {answer.hex(' ', 1)}")

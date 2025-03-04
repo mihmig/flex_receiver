@@ -3,8 +3,8 @@ import json
 from datetime import datetime
 from constants import *
 from plugins.storage_mysql import Storage
-from logger import log
-from telegram import Sender
+from plugins.logger import log
+from plugins.telegram import Sender
 
 
 class Consumer:
@@ -38,6 +38,7 @@ class Consumer:
             # Проверки на выход параметра за пределы и возврат в норму
             if value < p['min_value']:
                 if not p['triggered']:
+                    # Мониторинг уже сработал, повторно уведомления не рассылаем до возврата параметра внорму
                     self.storage.execute("UPDATE monitoring SET triggered = true WHERE id = %s", [id])
                     if p.get('alert'):
                         if p['below_min_message']:

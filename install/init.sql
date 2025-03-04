@@ -3,6 +3,8 @@ CREATE USER 'gnss'@'%' IDENTIFIED BY 'gnss';
 GRANT ALL PRIVILEGES ON gnss.* TO 'gnss'@'%';
 FLUSH PRIVILEGES;
 
+USE gnss;
+
 -- DROP TABLE `device`
 CREATE TABLE gnss.`device`
 (

@@ -1,19 +1,23 @@
-# Получение данных от GPS-трекеров по протоколу FLEX
-# 193.193.165.165 21626
-# 46.229.188.134 21626
+# Получение данных от GPS-трекеров Navtelecom по протоколу FLEX
 import socket
 import sys
 import threading
-from logger import log
+
+import yaml
+
+from plugins.aquarium import Aquarium
+from plugins.logger import log
 from crc8_flex import crc8
-from config import config
 from consumer import Consumer
 
 from constants import *
 from packet_decoder import decode_packet, decode_flex_message
 from plugins.storage_mysql import Storage
-from telegram import Sender
+from plugins.telegram import Sender
 from timeout_checker import Checker
+
+with open('config/config.yml', "r", encoding="utf-8") as stream:
+    config = yaml.safe_load(stream)
 
 sender = Sender(config['telegram'])
 storage = Storage(config)
@@ -63,7 +67,7 @@ def flex_thread(local_socket, client_info):
             message = decode_flex_message(fields, res['payload'])
             consumer.consume_flex_message(imei, packet_type, data, message)
         elif packet_type == PACKET_TYPE_T:
-            local_socket.send(data[0:2] + crc8(data[0:6]).to_bytes(1, "little"))
+            local_socket.send(data[0:6] + crc8(data[0:6]).to_bytes(1, "little"))
             message = decode_flex_message(fields, res['payload'])
             consumer.consume_flex_message(imei, packet_type, data, message)
         elif packet_type == PACKET_TYPE_HANDSHAKE:
@@ -94,6 +98,8 @@ def main():
         sys.exit(5)
     flex_socket.listen(100)
     threading.Thread(target=checker.check).start()
+    aquarium = Aquarium(config, storage, sender)
+    threading.Thread(target=aquarium.run).start()
     try:
         while True:
             in_socket, in_addrinfo = flex_socket.accept()

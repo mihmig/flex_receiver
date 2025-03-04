@@ -1,0 +1,31 @@
+telegram:
+  bot_token: '111111111:22222222222222222222222'
+  # Основной чат (для уведомлений)
+  chat_id: '333333333333333333333333'
+  # Служебный чат (для сообщений об ошибках и т.п.)
+  service_chat_id: 47254369
+# Интервал отсутствия связи с устройством по умолчанию
+device_default_timeout: 3600
+# Интервал отсутствия показания датчика по умолчанию
+sensor_default_timeout: 86400
+# Список полей, отображаемых в отладочных сообщениях
+fields_to_show:
+  - '1'
+  - '2'
+  - '3'
+  - '19'
+  - '49'
+  - '51'
+storage': 'db_mysql'
+database:
+  database: 'gnss'
+  user: 'gnss'
+  password: 'gnss'
+  host: '127.0.0.1'
+  port: 3306
+  autocommit: True
+  size: 3
+  maxsize: 5
+  pre_create_num: 3
+  name: 'pool1'
+  charset: 'utf8mb4'

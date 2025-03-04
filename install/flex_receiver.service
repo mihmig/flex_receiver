@@ -1,0 +1,21 @@
+[Unit]
+Description=flex_receiver
+After=syslog.target
+After=network.target
+After=mysql.service
+[Service]
+Type=simple
+PIDFile=/var/lib/flex_receiver.pid
+WorkingDirectory=/opt/flex_receiver
+User=root
+Group=root
+Environment=PYTHONPATH=/opt/flex_receiver
+OOMScoreAdjust=-100
+ExecStart=/usr/local/bin/python3 -u flex_receiver.py
+#ExecStop=
+#ExecReload=
+TimeoutSec=300
+Restart=always
+[Install]
+WantedBy=multi-user.target
+

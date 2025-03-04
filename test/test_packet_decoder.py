@@ -1,11 +1,12 @@
 # Тестирование декодера пакетов и модуля хранения
-from constants import PACKET_TYPE_A, PACKET_TYPE_C
-from consumer import Consumer
-from packet_decoder import decode_packet, decode_flex_message
-import pprint
-from config import config
-from plugins.storage_mysql import Storage
-from telegram import Sender
+from packet_decoder import decode_packet
+
+with open('test/1207', mode="rb") as f:
+    data = f.read()
+    res = decode_packet(data)
+    imei = res['imei']
+    print(imei)
+exit(1)
 
 pp = pprint.PrettyPrinter(compact=True)
 sender = Sender(config['telegram'])
@@ -15,7 +16,6 @@ consumer = Consumer(config, storage, sender)
 object_methods = [method_name for method_name in dir(consumer)
                   if callable(getattr(consumer, method_name))]
 print(object_methods)
-exit(1)
 with open('test/HANDSHAKE_862531045630978', mode="rb") as f:
     data = f.read()
     res = decode_packet(data)

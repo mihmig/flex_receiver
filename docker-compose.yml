@@ -1,0 +1,43 @@
+name: flex
+
+services:
+  flex-db:
+    image: mariadb:11.4
+    container_name: flex-db
+    ports:
+      - "127.0.0.1:8003:3306"
+    environment:
+      - TZ=Europe/Moscow
+      - MYSQL_ROOT_PASSWORD=gnss
+      - MYSQL_DATABASE=gnss
+      - MYSQL_USER=gnss
+      - MYSQL_PASSWORD=gnss
+    volumes:
+      - ./db_data:/var/lib/mysql
+      - ./backup:/backup
+    networks:
+      - flex
+    restart: unless-stopped
+    # command: --init-file /data/application/init.sql
+    # docker-compose up -d flex-db
+    # docker exec -it flex-db /bin/bash
+  flex:
+    build: .  # Указываем, что образ собирается из текущей директории (где Dockerfile)
+    environment:
+      - TZ=Europe/Moscow
+    # docker-compose up flex --build
+    # docker exec -it flex /bin/bash
+    container_name: flex
+    ports:
+      - "21626:21626"
+    volumes:
+      - ./config:/app/config:ro
+    depends_on:
+      - flex-db
+    networks:
+      - flex
+    restart: unless-stopped
+
+networks:
+  flex:
+    driver: bridge
