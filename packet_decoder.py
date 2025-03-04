@@ -55,7 +55,7 @@ def decode_packet(data):
             'message': f'Packet T, length: {len(data)} bytes. Event index: {eventindex}'
         }
     elif len(data) > 20 and data[0:4] == NTCB_HEADER and data[16:20] == HANDSHAKE_HEADER:
-        imei = data[20:].decode('ascii')
+        imei = data[20:35].decode('ascii')
         return {
             'packet_type': PACKET_TYPE_HANDSHAKE,
             'imei': imei,
