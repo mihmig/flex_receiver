@@ -17,7 +17,10 @@
 
 * git clone git@github.com:mihmig/flex_receiver.git cd /opt/flex_receiver
 * cd /opt/flex_receiver
-
+* docker-compose up flex-db
+* docker exec flex-db /bin/bash -c 'mariadb gnss -p$MYSQL_ROOT_PASSWORD </backup/gnss.sql'
+* docker-compose up flex --build
+* 
 ### При запуске на Centos/Almalinux нужно открыть порт firewall-а
 firewall-cmd --permanent --add-port=21626/udp
 
@@ -72,6 +75,7 @@ docker up --build flex
 ### Архивация и восстановление БД в докере
 
 * docker exec flex-db /bin/bash -c 'mariadb-dump gnss -p$MYSQL_ROOT_PASSWORD >/backup/gnss.sql'
+* docker exec flex-db /bin/bash -c 'mariadb gnss -p$MYSQL_ROOT_PASSWORD </backup/gnss.sql'
 * Для windows 
   * docker exec flex-db /bin/bash -c "mariadb gnss -p$MYSQL_ROOT_PASSWORD </backup/gnss.sql"
 

@@ -99,7 +99,7 @@ def main():
     flex_socket.listen(100)
     threading.Thread(target=checker.check).start()
     aquarium = Aquarium(config, storage, sender)
-    threading.Thread(target=aquarium.run_test()).start()
+    threading.Thread(target=aquarium.run).start()
     try:
         while True:
             in_socket, in_addrinfo = flex_socket.accept()
