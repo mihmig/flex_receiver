@@ -17,6 +17,8 @@ services:
       - ./backup:/backup
     networks:
       - flex
+    mem_limit: 256m  # Ограничение памяти
+    mem_reservation: 128m  # Резервирование памяти
     restart: unless-stopped
     # command: --init-file /data/application/init.sql
     # docker-compose up -d flex-db
