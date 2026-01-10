@@ -5,6 +5,7 @@ import threading
 
 import yaml
 
+from plugins.InetDetector import InetDetector
 from plugins.aquarium import Aquarium
 from plugins.logger import log
 from crc8_flex import crc8
@@ -97,9 +98,14 @@ def main():
         log(e.strerror)
         sys.exit(5)
     flex_socket.listen(100)
+    # Периодические проверки
     threading.Thread(target=checker.check).start()
+
     aquarium = Aquarium(config, storage, sender)
     threading.Thread(target=aquarium.run).start()
+
+    inet_detector = InetDetector(config, storage)
+    threading.Thread(target=inet_detector.run).start()
     try:
         while True:
             in_socket, in_addrinfo = flex_socket.accept()
