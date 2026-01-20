@@ -6,6 +6,7 @@ from retrying import retry
 
 
 def retry_if_io_error(exception):
+    print(f"error: {exception}")
     return isinstance(exception, IOError)
 
 

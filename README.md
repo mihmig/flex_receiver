@@ -70,7 +70,7 @@ PYTHONPATH=/projects/flex_receiver/ /usr/local/bin/python3.10 test/test_telegram
 ```
 
 ### Запуск в докере
-docker up --build flex
+docker-compose up -d --build flex
 
 ### Архивация и восстановление БД в докере
 
