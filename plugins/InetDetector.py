@@ -7,6 +7,7 @@ import requests
 import schedule
 import yaml
 
+from plugins.logger import log
 from plugins.storage_mysql import Storage
 
 
@@ -26,7 +27,7 @@ class InetDetector:
         self.state = 'ONLINE'
 
     def send_message(self, message: str):
-        print(f'отправляем сообщение: message')
+        log(f'Отправляем сообщение: message')
         requests.post(self.url,
                       params=self.params,
                       headers=self.headers,
@@ -41,7 +42,7 @@ class InetDetector:
         """, [device_id])
 
     def check_inet(self):
-        print('Проверяем статус')
+        log('Проверяем статус')
         now = datetime.now()
         d = self.get_device_data(self.device_id)
         last_alive = d.get('last_alive')
