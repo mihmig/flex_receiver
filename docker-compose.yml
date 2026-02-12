@@ -23,6 +23,24 @@ services:
     # command: --init-file /data/application/init.sql
     # docker-compose up -d flex-db
     # docker exec -it flex-db /bin/bash
+  db-cleaner:
+    image: mariadb:11.4
+    container_name: flex-db-cleaner
+    environment:
+      - TZ=Europe/Moscow
+      - MYSQL_DATABASE=gnss
+      - MYSQL_USER=gnss
+      - MYSQL_PASSWORD=gnss
+    depends_on:
+      - flex-db
+    networks:
+      - flex
+    entrypoint: >
+      /bin/sh -c "
+      while true; do
+        sleep 86400;
+        mariadb -h flex-db -u $${MYSQL_USER} -p$${MYSQL_PASSWORD} $${MYSQL_DATABASE} -e \"DELETE FROM message WHERE device_id=8 AND datetime < NOW() - INTERVAL 14 DAY;\";
+      done"
   flex:
     build: .  # Указываем, что образ собирается из текущей директории (где Dockerfile)
     environment:

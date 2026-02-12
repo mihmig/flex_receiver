@@ -30,8 +30,7 @@ class Checker:
             devices = self.storage.get_data("""
                 SELECT id, imei, `name`, `comment`, last_alive, timeout, state, timeout_message, online_message, chat_id
                 FROM device 
-                WHERE state <> 'ERROR'
-                OR state IS NULL  
+                WHERE (state <> 'ERROR' OR state IS NULL)  
                 AND chat_id IS NOT NULL
             """)
             # Статус устройств

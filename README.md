@@ -85,6 +85,22 @@ docker-compose up -d --build flex
 0 10,20 * * 1-7 cd /projects/flex_receiver && python3 scheduled_message.py >>/var/scheduled_message.log 2>>/var/scheduled_message.err
 ```
 
+#### Удаление ненужных исторических данных
+* [LINUX] docker exec flex-db /bin/bash -c 'mariadb gnss -p$MYSQL_ROOT_PASSWORD -e "DELETE FROM message WHERE device_id=8 AND datetime < DATE_SUB(NOW(), INTERVAL 2 WEEK);"' 
+* [WINDOWS] docker exec flex-db /bin/bash -c "mariadb gnss -p$MYSQL_ROOT_PASSWORD -e 'DELETE FROM message WHERE device_id=8 AND datetime < DATE_SUB(NOW(), INTERVAL 2 WEEK);'" 
+* DELETE FROM message WHERE device_id = 1 AND message_type IN ('h','a');
+* DELETE FROM message WHERE device_id = 6
+* 
+``` sql 
+CREATE EVENT IF NOT EXISTS daily_delete_old_rows
+ON SCHEDULE EVERY 1 DAY
+STARTS CURRENT_TIMESTAMP
+DO
+  DELETE FROM message WHERE device_id=8 AND datetime < NOW() - INTERVAL 14 DAY;
+```  
+* [1105] Event scheduler is switched off, use SET GLOBAL event_scheduler=ON to enable it.
+* 
+
 ### Настройка геозон
 * https://yandex.ru/dev/maps/jsbox/2.1/geoobject_events
 
