@@ -26,6 +26,7 @@ class InetDetector:
         self.state = 'ONLINE'
 
     def send_message(self, message: str):
+        print(f'отправляем сообщение: message')
         requests.post(self.url,
                       params=self.params,
                       headers=self.headers,
@@ -40,6 +41,7 @@ class InetDetector:
         """, [device_id])
 
     def check_inet(self):
+        print('Проверяем статус')
         now = datetime.now()
         d = self.get_device_data(self.device_id)
         last_alive = d.get('last_alive')
