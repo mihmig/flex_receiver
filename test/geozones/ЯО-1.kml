@@ -1,0 +1,142 @@
+<?xml version='1.0' encoding='utf-8'?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <document_name>Axenta Geofences Export</document_name>
+    <document_description>Exported 3 geofences</document_description>
+    <Placemark>
+      <name>Ярославль</name>
+      <description>#main</description>
+      <ExtendedData>
+        <Data name="name_font_size">
+          <value>14</value>
+        </Data>
+        <Data name="type">
+          <value>polygon</value>
+        </Data>
+        <Data name="zoom_visible_from">
+          <value>1</value>
+        </Data>
+        <Data name="zoom_visible_to">
+          <value>20</value>
+        </Data>
+        <Data name="square">
+          <value>38258.77776852723</value>
+        </Data>
+        <Data name="perimeter_meters">
+          <value>65432.0</value>
+        </Data>
+        <Data name="source_geo">
+          <value>[{"lat": 57.73182024027124, "lng": 39.71952438354492}, {"lat": 57.71698775608636, "lng": 40.022506713867195}, {"lat": 57.64600137534165, "lng": 39.98886108398438}, {"lat": 57.54165999245751, "lng": 39.88037109375001}, {"lat": 57.55679520667983, "lng": 39.79797363281251}, {"lat": 57.64600137534165, "lng": 39.71351623535157}, {"lat": 57.73182024027124, "lng": 39.71952438354492}]</value>
+        </Data>
+      </ExtendedData>
+      <Style>
+        <LabelStyle>
+          <color>FF1E4CDD</color>
+        </LabelStyle>
+        <PolyStyle>
+          <color>991E4CDD</color>
+        </PolyStyle>
+        <LineStyle>
+          <color>FF1E4CDD</color>
+        </LineStyle>
+      </Style>
+      <Polygon>
+        <outerBoundaryIs>
+          <LinearRing>
+            <coordinates>39.71952438354492,57.73182024027124,0 40.022506713867195,57.71698775608636,0 39.98886108398438,57.64600137534165,0 39.88037109375001,57.54165999245751,0 39.79797363281251,57.55679520667983,0 39.71351623535157,57.64600137534165,0 39.71952438354492,57.73182024027124,0</coordinates>
+          </LinearRing>
+        </outerBoundaryIs>
+      </Polygon>
+    </Placemark>
+    <Placemark>
+      <name>На курбу</name>
+      <description>#in_с_дачи,#out_на_дачу</description>
+      <ExtendedData>
+        <Data name="name_font_size">
+          <value>14</value>
+        </Data>
+        <Data name="type">
+          <value>polygon</value>
+        </Data>
+        <Data name="zoom_visible_from">
+          <value>1</value>
+        </Data>
+        <Data name="zoom_visible_to">
+          <value>20</value>
+        </Data>
+        <Data name="square">
+          <value>184.4418605365214</value>
+        </Data>
+        <Data name="perimeter_meters">
+          <value>5174.0</value>
+        </Data>
+        <Data name="source_geo">
+          <value>[{"lat": 57.632008333987685, "lng": 39.70604896545411}, {"lat": 57.62611490730408, "lng": 39.70888137817383}, {"lat": 57.63039694548669, "lng": 39.739866256713874}, {"lat": 57.63619760820379, "lng": 39.73746299743653}, {"lat": 57.632008333987685, "lng": 39.70604896545411}]</value>
+        </Data>
+      </ExtendedData>
+      <Style>
+        <LabelStyle>
+          <color>FF1E4CDD</color>
+        </LabelStyle>
+        <PolyStyle>
+          <color>9951B24D</color>
+        </PolyStyle>
+        <LineStyle>
+          <color>FF51B24D</color>
+        </LineStyle>
+      </Style>
+      <Polygon>
+        <outerBoundaryIs>
+          <LinearRing>
+            <coordinates>39.70604896545411,57.632008333987685,0 39.70888137817383,57.62611490730408,0 39.739866256713874,57.63039694548669,0 39.73746299743653,57.63619760820379,0 39.70604896545411,57.632008333987685,0</coordinates>
+          </LinearRing>
+        </outerBoundaryIs>
+      </Polygon>
+    </Placemark>
+    <Placemark>
+      <name>На Тутаев</name>
+      <description>#in_из_Тутаева, #out_в_Тутаев</description>
+      <ExtendedData>
+        <Data name="name_font_size">
+          <value>14</value>
+        </Data>
+        <Data name="type">
+          <value>polygon</value>
+        </Data>
+        <Data name="zoom_visible_from">
+          <value>1</value>
+        </Data>
+        <Data name="zoom_visible_to">
+          <value>20</value>
+        </Data>
+        <Data name="square">
+          <value>911.9091198381557</value>
+        </Data>
+        <Data name="perimeter_meters">
+          <value>10549.0</value>
+        </Data>
+        <Data name="source_geo">
+          <value>[{"lat": 57.73792596002207, "lng": 39.70252990722657}, {"lat": 57.71671217232496, "lng": 39.74596023559571}, {"lat": 57.72718287470406, "lng": 39.76673126220704}, {"lat": 57.74930829858383, "lng": 39.72930908203126}, {"lat": 57.73792596002207, "lng": 39.70252990722657}]</value>
+        </Data>
+      </ExtendedData>
+      <Style>
+        <LabelStyle>
+          <color>FF1E4CDD</color>
+        </LabelStyle>
+        <PolyStyle>
+          <color>9951B24D</color>
+        </PolyStyle>
+        <LineStyle>
+          <color>FF51B24D</color>
+        </LineStyle>
+      </Style>
+      <Polygon>
+        <outerBoundaryIs>
+          <LinearRing>
+            <coordinates>39.70252990722657,57.73792596002207,0 39.74596023559571,57.71671217232496,0 39.76673126220704,57.72718287470406,0 39.72930908203126,57.74930829858383,0 39.70252990722657,57.73792596002207,0</coordinates>
+          </LinearRing>
+        </outerBoundaryIs>
+      </Polygon>
+    </Placemark>
+  </Document>
+</kml>

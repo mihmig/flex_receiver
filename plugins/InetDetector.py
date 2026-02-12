@@ -34,7 +34,7 @@ class InetDetector:
 
     def get_device_data(self, device_id: int) -> dict:
         return self.storage.get_line("""
-            SELECT id, last_alive, timeout, timeout_message, online_message 
+            SELECT id, last_alive, timeout, timeout_message, online_message, state 
             FROM device
             WHERE id = %s
         """, [device_id])
@@ -46,12 +46,16 @@ class InetDetector:
         timeout = d.get('timeout')
 
         interval = round((now - last_alive).total_seconds())
-        if interval > timeout and self.state == 'ONLINE':
-            self.send_message(d['timeout_message'])
-            self.state = 'OFFLINE'
-        elif self.state == 'OFFLINE':
-            self.send_message(d['online_message'])
-            self.state = 'ONLINE'
+        if d.get('state') is None or d.get('state') == 'ONLINE':
+            if interval > timeout:
+                self.send_message(d['timeout_message'])
+                self.storage.execute("UPDATE device SET state = %s WHERE id = %s", ['OFFLINE', d['id']])
+            elif d.get('state') is None:
+                self.storage.execute("UPDATE device SET state = %s WHERE id = %s", ['ONLINE', d['id']])
+        elif d.get('state') == "OFFLINE":
+            if interval < timeout:
+                self.send_message(d['online_message'])
+                self.storage.execute("UPDATE device SET state = %s WHERE id = %s", ['ONLINE', d['id']])
 
     def run(self):
         schedule.every(1).minute.do(self.check_inet)
