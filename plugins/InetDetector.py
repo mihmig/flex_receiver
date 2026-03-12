@@ -42,7 +42,6 @@ class InetDetector:
         """, [device_id])
 
     def check_inet(self):
-        log('Проверяем статус')
         log(f'[{threading.get_ident()}] Проверяем статус')
         now = datetime.now()
         d = self.get_device_data(self.device_id)
@@ -65,7 +64,7 @@ class InetDetector:
         schedule.every(1).minute.do(self.check_inet)
         while True:
             schedule.run_pending()
-            time.sleep(1)
+            time.sleep(10)
         # while True:
         #     n = schedule.idle_seconds()
         #     if n is None:
