@@ -82,22 +82,14 @@ class Aquarium:
         schedule.every().day.at("10:00").do(self.send_notification)
         schedule.every().day.at("20:00").do(self.send_notification)
         while True:
-            n = schedule.idle_seconds()
-            if n is None:
-                time.sleep(600)
-            elif n > 0:
-                time.sleep(n)
             schedule.run_pending()
+            time.sleep(10)
 
     def run_test(self):
         schedule.every(1).minutes.do(self.send_notification)
         while True:
-            n = schedule.idle_seconds()
-            if n is None:
-                time.sleep(600)
-            elif n > 0:
-                time.sleep(n)
             schedule.run_pending()
+            time.sleep(10)
 
 
 if __name__ == '__main__':
