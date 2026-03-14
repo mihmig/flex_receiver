@@ -3,7 +3,9 @@ import socket
 import sys
 import threading
 
+import schedule
 import yaml
+import time
 
 from plugins.InetDetector import InetDetector
 from plugins.aquarium import Aquarium
@@ -19,12 +21,6 @@ from timeout_checker import Checker
 
 with open('config/config.yml', "r", encoding="utf-8") as stream:
     config = yaml.safe_load(stream)
-
-sender = Sender(config['telegram'])
-storage = Storage(config)
-consumer = Consumer(config, storage, sender)
-checker = Checker(config, storage, sender)
-
 
 def receive_from_socket(s):
     # receive data from a socket until no more data is there
@@ -89,34 +85,41 @@ def flex_thread(local_socket, client_info):
             continue
 
 
-def main():
-    flex_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    flex_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    try:
-        flex_socket.bind(('0.0.0.0', LOCAL_PORT))
-    except socket.error as e:
-        log(e.strerror)
-        sys.exit(5)
-    flex_socket.listen(100)
-    # Периодические проверки
-    threading.Thread(target=checker.check).start()
-
-    aquarium = Aquarium(config, storage, sender)
-    threading.Thread(target=aquarium.run).start()
-
-    inet_detector = InetDetector(config, storage)
-    threading.Thread(target=inet_detector.run).start()
-    try:
-        while True:
-            in_socket, in_addrinfo = flex_socket.accept()
-            client_info = ':'.join(map(lambda x: str(x or ''), in_addrinfo))
-            log(f'Connection from {in_addrinfo}')
-            _ = threading.Thread(target=flex_thread,
-                                 args=(in_socket, client_info)).start()
-    except KeyboardInterrupt:
-        log('Ctrl+C detected, exiting...')
-        sys.exit(0)
+def schedule_thread():
+    while True:
+        n = schedule.idle_seconds()
+        if n is None:
+            time.sleep(30)
+        elif n > 0:
+            time.sleep(n)
+        schedule.run_pending()
 
 
-if __name__ == '__main__':
-    main()
+sender = Sender(config['telegram'])
+storage = Storage(config)
+consumer = Consumer(config, storage, sender)
+checker = Checker(config, storage, sender)
+aquarium = Aquarium(config, storage, sender)
+inet_detector = InetDetector(config, storage)
+
+flex_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+flex_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+try:
+    flex_socket.bind(('0.0.0.0', LOCAL_PORT))
+except socket.error as e:
+    log(e.strerror)
+    sys.exit(5)
+flex_socket.listen(100)
+
+threading.Thread(target=schedule_thread, daemon=True).start()
+
+try:
+    while True:
+        in_socket, in_addrinfo = flex_socket.accept()
+        client_info = ':'.join(map(lambda x: str(x or ''), in_addrinfo))
+        log(f'Connection from {in_addrinfo}')
+        _ = threading.Thread(target=flex_thread,
+                             args=(in_socket, client_info)).start()
+except KeyboardInterrupt:
+    log('Ctrl+C detected, exiting...')
+    sys.exit(0)

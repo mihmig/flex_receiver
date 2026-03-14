@@ -5,7 +5,6 @@
 # 🔴 Температура воздуха 18 °C
 # 🟢 Внешнее питание терминала в норме
 
-import threading
 from datetime import datetime, timedelta
 import schedule
 import time
@@ -24,6 +23,8 @@ class Aquarium:
         self.chat_id = p_config['telegram']['chat_id']
         self.final_message = "Текущее состояние системы охлаждения аквариума:\n"
         self.device_id = 4
+        schedule.every().day.at("10:00").do(self.send_notification)
+        schedule.every().day.at("20:00").do(self.send_notification)
 
     # Возвращает состояние параметра в человекочитаемом виде
     # и необходимость внимания (True - требует внимания, False - норма)
@@ -78,19 +79,6 @@ class Aquarium:
 
         self.sender.send_message(self.chat_id, final_message, disable_notification)
 
-    def run(self):
-        schedule.every().day.at("10:00").do(self.send_notification)
-        schedule.every().day.at("20:00").do(self.send_notification)
-        while True:
-            schedule.run_pending()
-            time.sleep(10)
-
-    def run_test(self):
-        schedule.every(1).minutes.do(self.send_notification)
-        while True:
-            schedule.run_pending()
-            time.sleep(10)
-
 
 if __name__ == '__main__':
     with open('config/config.yml', "r", encoding="utf-8") as stream:
@@ -99,4 +87,7 @@ if __name__ == '__main__':
     sender = Sender(config['telegram'])
     storage = Storage(config)
     aquarium = Aquarium(config, storage, sender)
-    threading.Thread(target=aquarium.run_test).start()
+    schedule.every(1).minutes.do(aquarium.send_notification)
+    while True:
+        schedule.run_pending()
+        time.sleep(10)

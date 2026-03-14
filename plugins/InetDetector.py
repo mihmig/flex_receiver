@@ -25,9 +25,10 @@ class InetDetector:
             "Content-Type": "application/json"
         }
         self.state = 'ONLINE'
+        schedule.every(1).minute.do(self.check_inet)
 
     def send_message(self, message: str):
-        log(f'Отправляем сообщение: message')
+        log(f'Отправляем сообщение: {message}')
         requests.post(self.url,
                       params=self.params,
                       headers=self.headers,
@@ -42,7 +43,7 @@ class InetDetector:
         """, [device_id])
 
     def check_inet(self):
-        log(f'[{threading.get_ident()}] Проверяем статус')
+        log(f'[{threading.get_ident()}] Проверяем статус интернета в Архангельске')
         now = datetime.now()
         d = self.get_device_data(self.device_id)
         last_alive = d.get('last_alive')
@@ -60,19 +61,6 @@ class InetDetector:
                 self.send_message(d['online_message'])
                 self.storage.execute("UPDATE device SET state = %s WHERE id = %s", ['ONLINE', d['id']])
 
-    def run(self):
-        schedule.every(1).minute.do(self.check_inet)
-        while True:
-            schedule.run_pending()
-            time.sleep(10)
-        # while True:
-        #     n = schedule.idle_seconds()
-        #     if n is None:
-        #         time.sleep(30)
-        #     elif n > 0:
-        #         time.sleep(n)
-        #     schedule.run_pending()
-
 
 if __name__ == '__main__':
     with open('config/config.yml', "r", encoding="utf-8") as stream:
@@ -80,4 +68,6 @@ if __name__ == '__main__':
 
     storage = Storage(config)
     inet_detector = InetDetector(config, storage)
-    threading.Thread(target=inet_detector.run).start()
+    while True:
+        schedule.run_pending()
+        time.sleep(10)
