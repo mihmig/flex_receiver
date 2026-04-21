@@ -4,6 +4,7 @@ __pycache__/
 backup/*
 !db_data/.placeholder
 db_data/*
-config/config.yml
+!config/config.yml.sample
+config/*
 venv
 .venv

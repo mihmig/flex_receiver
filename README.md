@@ -72,9 +72,10 @@ PYTHONPATH=/projects/flex_receiver/ /usr/local/bin/python3.10 test/test_telegram
 ### Запуск в докере
 docker-compose up -d --build flex
 
-### Архивация и восстановление БД в докере
-
+### Архивация 
 * docker exec flex-db /bin/bash -c 'mariadb-dump gnss -p$MYSQL_ROOT_PASSWORD >/backup/gnss.sql'
+
+### Восстановление
 * docker exec flex-db /bin/bash -c 'mariadb gnss -p$MYSQL_ROOT_PASSWORD </backup/gnss.sql'
 * Для windows 
   * docker exec flex-db /bin/bash -c "mariadb gnss -p$MYSQL_ROOT_PASSWORD </backup/gnss.sql"
@@ -129,3 +130,5 @@ DO
 То:
 1. Снимаем статус "alert"
 2. Уведомляем о возврате параметра в норму
+
+### Обслуживание
