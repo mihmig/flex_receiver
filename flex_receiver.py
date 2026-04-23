@@ -4,10 +4,9 @@ import sys
 import threading
 
 import schedule
-import yaml
 import time
 
-from plugins.InetDetector import InetDetector
+from plugins.alert_service import AlertService
 from plugins.aquarium import Aquarium
 from plugins.logger import log
 from crc8_flex import crc8
@@ -15,12 +14,11 @@ from consumer import Consumer
 
 from constants import *
 from packet_decoder import decode_packet, decode_flex_message
+from plugins.max_sender import MaxSender
+from plugins.monitoring_service import MonitoringService
 from plugins.storage_mysql import Storage
-from plugins.telegram import Sender
+from plugins.telegram_sender import TelegramSender
 from timeout_checker import Checker
-
-with open('config/config.yml', "r", encoding="utf-8") as stream:
-    config = yaml.safe_load(stream)
 
 def receive_from_socket(s):
     # receive data from a socket until no more data is there
@@ -33,14 +31,14 @@ def receive_from_socket(s):
     return b
 
 
-def flex_thread(local_socket, client_info):
+def flex_thread(local_socket, p_client_info):
     imei = ''
     fields = []
     structure_length = 0
     while True:
         data = receive_from_socket(local_socket)
         if not data:
-            log(f'THREAD: client: {client_info} disconnected')
+            log(f'THREAD: client: {p_client_info} disconnected')
             break
         # Обработка пакетов
         res = decode_packet(data)
@@ -77,7 +75,8 @@ def flex_thread(local_socket, client_info):
             local_socket.send(VERSION_APPROVAL_ANSWER)
             consumer.consume_flex_message(imei, packet_type, data, res)
         elif packet_type == PACKET_TYPE_ERROR:
-            consumer.consume_flex_message(imei, packet_type, data, res)
+            if imei.isdigit():
+                consumer.consume_flex_message(imei, packet_type, data, res)
             local_socket.close()
             return
         else:
@@ -95,12 +94,16 @@ def schedule_thread():
         schedule.run_pending()
 
 
-sender = Sender(config['telegram'])
-storage = Storage(config)
-consumer = Consumer(config, storage, sender)
-checker = Checker(config, storage, sender)
-aquarium = Aquarium(config, storage, sender)
-inet_detector = InetDetector(config, storage)
+storage = Storage()
+telegram_sender = TelegramSender(storage)
+max_sender = MaxSender(storage)
+alert_service = AlertService(storage, telegram_sender, max_sender)
+monitoring_service = MonitoringService(storage, alert_service)
+consumer = Consumer(storage, monitoring_service)
+
+checker = Checker(storage, alert_service)
+aquarium = Aquarium(storage, alert_service)
+# inet_detector = InetDetector(storage)
 
 flex_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 flex_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)

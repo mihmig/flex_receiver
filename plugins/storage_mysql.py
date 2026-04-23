@@ -1,31 +1,96 @@
 # Плагин. Хранилище устройств в БД MariaDb(Mysql)
+from datetime import datetime
+from typing import Any
+
 from plugins.db_mysql import Db
 
 
 class Storage(Db):
-    def __init__(self, config: dict):
-        Db.__init__(self, config['database'])
-        self.config = config
+    def __init__(self):
+        Db.__init__(self)
+        self.device_id_cache = {}
+        self.device_cache = {}
+        self.system_parameters_cache = self.get_system_parameters()
 
     def get_device_id_by_imei(self, imei: str) -> tuple:
-        device = self.get_value('SELECT id FROM device WHERE imei = %s', [imei])
-        if device is not None:
-            return device, False
+        if imei in self.device_id_cache:
+            device_id = self.device_id_cache[imei]
+            return device_id, False
+        device_id = self.get_value('SELECT id FROM device WHERE imei = %s', [imei])
+        if device_id is not None:
+            return device_id, False
         device_id = self.insert('INSERT INTO device (imei) VALUES (%s)', [imei])
+        self.device_id_cache[imei] = device_id
         return device_id, True
 
-    def get_parameter_description(self, parameter_id: int):
+    def get_device(self, device_id: int) -> dict| None:
+        if device_id in self.device_cache:
+            return self.device_cache[device_id]
+        device = self.get_line('SELECT * FROM device WHERE id = %s', [device_id])
+        if device is not None:
+            self.device_cache[device_id] = device
+        return device
+
+    def get_parameter_description(self, parameter_id: int) -> str:
+        """ Возвращает описание параметра. """
         return self.get_value("SELECT description FROM parameter WHERE id = %s", [parameter_id])
 
-    def update_last_alive(self, device_id: int):
+    def update_last_alive(self, device_id: int) -> None:
+        """ Обновляет время, когда устройство последний раз было онлайн. """
         self.execute("UPDATE device SET last_alive = NOW() WHERE id = %s", [device_id])
 
-    def save_message(self, device_id: int, event_id: int, datetime: str,
+    def update_device_state(self, device: dict, state: str) -> None:
+        self.execute("UPDATE device SET state = %s WHERE id = %s", [state, device['id']])
+
+    def save_message(self, device_id: int, event_id: int, _datetime: str,
                      message_type: str, data: bytes | None, decoded: str | None):
         self.insert('INSERT INTO message (device_id, event_id, `datetime`, message_type, data, decoded)'
                     ' VALUES (%s, %s, %s, %s, %s, %s)',
-                    [device_id, event_id, datetime, message_type, data, decoded])
+                    [device_id, event_id, _datetime, message_type, data, decoded])
 
-    # Возвращает набор параметров для мониторинга данного устройства
     def get_device_monitoring(self, device_id: int) -> dict:
-        return self.get_data('SELECT * FROM monitoring WHERE device_id=%s', [device_id])
+        """ Возвращает набор параметров для мониторинга данного устройства """
+        return self.get_dict('SELECT * FROM monitoring WHERE device_id=%s', [device_id])
+
+    def get_system_parameters(self) -> dict:
+        """ Возвращает все параметры системы. """
+        return self.get_dict('SELECT `key`, `value` FROM settings')
+
+    def get_system_param(self, param_name: str) -> str:
+        """ Возвращает конкретный параметр системы. """
+        value = self.system_parameters_cache.get(param_name)
+        if value is not None:
+            return value
+        value = self.get_value('SELECT `value` FROM settings WHERE `key` = %s', [param_name])
+        if value is not None:
+            self.system_parameters_cache[param_name] = value
+        return value
+
+    def get_param_list(self, param_name: str) -> list[str]:
+        value = self.system_parameters_cache.get(param_name)
+        if value is not None:
+            return value
+        value = self.get_value('SELECT `value` FROM settings WHERE `key` = %s', [param_name])
+        if not value:
+            return []
+        param_list = value.split(',')
+        self.system_parameters_cache[param_name] = param_list
+        return param_list
+
+    def get_params_for_device(self, device_id: int) -> list[dict]:
+        """ Возвращает список контролируемых параметров устройства. """
+        return self.get_data("SELECT * FROM monitoring WHERE device_id = %s", [device_id])
+
+    def update_parameter(self, parameter_id:int, value: Any):
+        """ Обновляет значение параметра. """
+        self.execute("UPDATE monitoring SET `datetime` = %s, current_value = %s WHERE id = %s",
+                             [datetime.now(), value, parameter_id])
+
+    def set_triggered(self, parameter_id: int) -> None:
+        """ Устанавливаем флаг выхода значение параметра за допустимые пределы """
+        self.execute("UPDATE monitoring SET triggered = true WHERE id = %s", [parameter_id])
+
+    def reset_triggered(self, parameter_id: int) -> None:
+        """ Устанавливаем флаг выхода значение параметра за допустимые пределы """
+        self.execute("UPDATE monitoring SET triggered = false WHERE id = %s", [parameter_id])
+

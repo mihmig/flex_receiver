@@ -20,6 +20,30 @@ CREATE TABLE gnss.`device`
 
 ALTER TABLE gnss.`device` COMMENT='Устройства';
 
+DROP TABLE IF EXISTS settings;
+
+CREATE TABLE gnss.`settings`
+(
+	`key` VARCHAR(255) NOT NULL COMMENT 'Код настройки',
+	`value` VARCHAR(255) NULL COMMENT 'Название устройства',
+	`comment` VARCHAR(255) NULL COMMENT 'Комментарий',
+    created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Дата внесения в БД',
+	CONSTRAINT settings_pk PRIMARY KEY (`key`)
+) ENGINE=InnoDB;
+
+ALTER TABLE gnss.`settings` COMMENT='Системные настройки';
+
+INSERT INTO gnss.`settings` (`key`, value, comment) VALUES
+('alert','0', 'Глобальный флаготправки уведомлений'),
+('telegram_bot_token', '5699840798:AAGVDoe2qsZEpRbzO_YErjIyPsVY6EfBTFg', 'Токен Телеграм-бота'),
+('telegram_chat_id', '-1001882219961', 'Id телеграм-чата для отправки уведомлений'),
+('device_default_timeout', '3600', 'Интервал отсутствия связи с устройством по умолчанию'),
+('sensor_default_timeout', '86400', 'Интервал отсутствия показания датчика по умолчанию'),
+('fields_to_show', '1,2,3,19,49,51', 'Список полей, отображаемых в отладочных сообщениях'),
+('max_bot_token', 'f9LHodD0cOKqTxdNESaAjKoLcE22Rdf06YZJIPIx9nzMoLymaLzP5oXdD-O51mplTs_ZsNTBSC65kef98WOA', 'Токет MAX-бота'),
+('max_chat_id', '-71011425140800', 'Id MAX-чата для отправки уведомлений')
+
+
 -- DROP TABLE gnss.`event`
 CREATE TABLE gnss.`event`
 (

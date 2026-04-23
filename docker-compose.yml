@@ -57,6 +57,8 @@ services:
     # docker-compose up flex --build
     # docker exec -it flex /bin/bash
     container_name: flex
+    env_file:
+      - .env
     ports:
       - "21626:21626"
     volumes:

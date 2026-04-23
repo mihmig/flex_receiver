@@ -1,10 +1,9 @@
 .idea/
 __pycache__/
-!backup/.placeholder
 backup/*
-!db_data/.placeholder
 db_data/*
-!config/config.yml.sample
 config/*
 venv
 .venv
+http-client.private.env.json
+.env

@@ -13,6 +13,8 @@
     mysqlimport --local --fields-terminated-by=";" --lines-terminated-by="\r\n" -d -v gnss event.csv
     mysqlimport --local --fields-terminated-by=";" --lines-terminated-by="\r\n" -d -v gnss parameter.csv
     ```
+### Запуск для отладки локально
+PYTHONUNBUFFERED=1;DATABASE_HOST=localhost;DATABASE_PORT=8003;DATABASE_NAME=gnss;DATABASE_USER=gnss;DATABASE_PASSWORD=gnss
 ### Установка в докере
 
 * git clone git@github.com:mihmig/flex_receiver.git cd /opt/flex_receiver
@@ -130,5 +132,9 @@ DO
 То:
 1. Снимаем статус "alert"
 2. Уведомляем о возврате параметра в норму
+
+### Запуск локально
+PYTHONUNBUFFERED=1;DATABASE_HOST=localhost;DATABASE_PORT=8003;DATABASE_NAME=gnss;DATABASE_USER=gnss;DATABASE_PASSWORD=gnss
+
 
 ### Обслуживание

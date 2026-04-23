@@ -1,11 +1,9 @@
 # Тестирование отправки сообщения ботом
-import yaml
+from plugins.storage_mysql import Storage
+from plugins.telegram_sender import TelegramSender
 
-from plugins.telegram import Sender
+storage = Storage()
+telegram_sender = TelegramSender(storage)
 
-with open('config/config.yml', "r", encoding="utf-8") as stream:
-    config = yaml.safe_load(stream)
-chat_id = 47254369
-sender = Sender(config['telegram'])
-sender.send_message(chat_id, "Проверка отправки сообщений без уведомлений", True)
+telegram_sender.send_message(47254369, "Проверка отправки сообщений без уведомлений", True)
 

@@ -7,20 +7,17 @@
 
 from datetime import datetime, timedelta
 import schedule
-import time
 
-import yaml
-
+from plugins.alert_service import AlertService
+from plugins.max_sender import MaxSender
 from plugins.storage_mysql import Storage
-from plugins.telegram import Sender
+from plugins.telegram_sender import TelegramSender
 
 
 class Aquarium:
-    def __init__(self, p_config: dict, p_storage: Storage, p_sender: Sender):
-        self.config = p_config
-        self.sender = p_sender
+    def __init__(self, p_storage: Storage, p_alert_service: AlertService):
         self.storage = p_storage
-        self.chat_id = p_config['telegram']['chat_id']
+        self.alert_service = p_alert_service
         self.final_message = "Текущее состояние системы охлаждения аквариума:\n"
         self.device_id = 4
         schedule.every().day.at("10:00").do(self.send_notification)
@@ -33,7 +30,7 @@ class Aquarium:
             SELECT id, parameter_id, event_id, current_value, min_value, max_value,
                  `datetime`, timeout, no_data_message,
                  below_min_message, above_max_message, 
-                 `alert`, triggered, chat_id
+                 `alert`, triggered, telegram_chat_id, max_chat_id
                  FROM monitoring WHERE device_id = %s AND parameter_id = %s
                  """,
                                   [self.device_id, parameter_id])
@@ -77,17 +74,18 @@ class Aquarium:
         if alert:
             disable_notification = False
 
-        self.sender.send_message(self.chat_id, final_message, disable_notification)
+        device = self.storage.get_line("SELECT * FROM device WHERE id = %s", [self.device_id])
+        self.alert_service.send_alert_for_device(device, final_message, disable_notification)
 
 
 if __name__ == '__main__':
-    with open('config/config.yml', "r", encoding="utf-8") as stream:
-        config = yaml.safe_load(stream)
-
-    sender = Sender(config['telegram'])
-    storage = Storage(config)
-    aquarium = Aquarium(config, storage, sender)
-    schedule.every(1).minutes.do(aquarium.send_notification)
-    while True:
-        schedule.run_pending()
-        time.sleep(10)
+    storage = Storage()
+    telegram_sender = TelegramSender(storage)
+    max_sender = MaxSender(storage)
+    alert_service = AlertService(storage, telegram_sender, max_sender)
+    aquarium = Aquarium(storage, alert_service)
+    # schedule.every(1).minutes.do(aquarium.send_notification)
+    aquarium.send_notification()
+    # while True:
+    #     schedule.run_pending()
+    #     time.sleep(10)
