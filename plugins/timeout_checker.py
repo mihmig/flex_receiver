@@ -47,7 +47,7 @@ class Checker:
         """ Проверяет - как давно устройство выходило на связь, и передавало те или иные параметры """
         devices = self.storage.get_dictionary("""
             SELECT id, imei, `name`, `comment`, last_alive, timeout, state, timeout_message, online_message,
-                   telegram_chat_id, max_chat_id
+                   alert, telegram_chat_id, max_chat_id
             FROM device 
             WHERE state IS NOT NULL 
               AND state NOT IN ('ERROR', 'STOPPED')
@@ -59,17 +59,20 @@ class Checker:
         for device in devices.values():
             interval = round((now - device.get('last_alive')).total_seconds())
             if device.get('state') == DEVICE_STATE_ONLINE:
-                timeout = device.get('timeout') or self.storage.get_system_param('device_default_timeout')
+                timeout = device.get('timeout') or self.storage.get_system_param('device_default_timeout') or '3600'
+                timeout = int(timeout)
                 if interval > timeout:
                     message = get_device_offline_message(device, interval)
-                    self.alert_service.send_alert_for_device(device, message)
+                    if device.get('alert'):
+                        self.alert_service.send_alert_for_device(device, message)
                     self.storage.update_device_state(device, DEVICE_STATE_OFFLINE)
                     device_states[device['id']] = DEVICE_STATE_OFFLINE
             elif device.get('state') == DEVICE_STATE_OFFLINE:
                 # Устройство выходило на связь не далее, как 5 минут назад - считаем, что оно "Онлайн"
                 if interval < 300:
                     message = get_device_online_message(device)
-                    self.alert_service.send_alert_for_device(device, message)
+                    if device.get('alert'):
+                        self.alert_service.send_alert_for_device(device, message)
                     self.storage.update_device_state(device, DEVICE_STATE_ONLINE)
                     device_states[device['id']] = DEVICE_STATE_ONLINE
 
@@ -88,7 +91,8 @@ class Checker:
             # Проверяем - давно ли появлялся такой параметр
             last_data = param.get('datetime')
             interval = round((now - last_data).total_seconds())
-            timeout = param.get('timeout') or self.storage.get_system_param('device_default_timeout')
+            timeout = param.get('timeout') or self.storage.get_system_param('device_default_timeout') or '3600'
+            timeout = int(timeout)
             if interval > timeout:
                 if param.get('triggered_timeout'):
                     continue
@@ -97,7 +101,8 @@ class Checker:
                 else:
                     parameter_description = self.storage.get_parameter_description(param['parameter_id'])
                     message = f"Параметр '{parameter_description}' не поступал уже более {interval // 60} мин."
-                self.alert_service.send_alert(devices[param['device_id']], param, message)
+                if param.get('alert'):
+                    self.alert_service.send_alert(devices[param['device_id']], param, message)
                 self.storage.execute("UPDATE monitoring SET triggered_timeout = true WHERE id = %s", [param['id']])
                 continue
 
@@ -108,7 +113,8 @@ class Checker:
             else:
                 parameter_description = self.storage.get_parameter_description(param['parameter_id'])
                 message = f"Параметр '{parameter_description}' снова поступает"
-            self.alert_service.send_alert(devices[param['device_id']], param, message)
+            if param.get('alert'):
+                self.alert_service.send_alert(devices[param['device_id']], param, message)
             self.storage.execute("UPDATE monitoring SET triggered_timeout = false WHERE id = %s", [param['id']])
 
 

@@ -42,11 +42,12 @@ class Consumer:
 
     def debug_message(self, device_id: str, packet_type: str, message: dict):
         """ Выводит отдельные поля сообщения в консоль """
-        f = []
-        for i in self.storage.get_param_list('fields_to_show'):
-            if i in message:
-                f.append(message[i])
-            else:
-                f.append('~')
-        formatted_line = '\t'.join(str(x) for x in f)
-        log(f"{packet_type} {device_id} {formatted_line}")
+        # f = []
+        # for i in self.storage.get_param_list('fields_to_show'):
+        #     if i in message:
+        #         f.append(message[i])
+        #     else:
+        #         f.append('~')
+        # formatted_line = '\t'.join(str(x) for x in f)
+        # log(f"{packet_type} {device_id} {formatted_line}")
+        log(f"{packet_type} {device_id} {message}")

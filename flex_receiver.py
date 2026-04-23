@@ -18,7 +18,7 @@ from plugins.max_sender import MaxSender
 from plugins.monitoring_service import MonitoringService
 from plugins.storage_mysql import Storage
 from plugins.telegram_sender import TelegramSender
-from timeout_checker import Checker
+from plugins.timeout_checker import Checker
 
 def receive_from_socket(s):
     # receive data from a socket until no more data is there

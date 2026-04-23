@@ -21,7 +21,7 @@ class MonitoringService:
             value = decoded.get(str(parameter_id))
             if value is None:
                 continue  # В полученных данных нет данного параметра
-            self.storage.update_parameter(parameter_id, value)
+            self.storage.update_parameter(_id, value)
 
             # Проверки на выход параметра за пределы и возврат в норму
             if value < param['min_value']:

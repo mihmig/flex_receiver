@@ -81,16 +81,16 @@ class Storage(Db):
         """ Возвращает список контролируемых параметров устройства. """
         return self.get_data("SELECT * FROM monitoring WHERE device_id = %s", [device_id])
 
-    def update_parameter(self, parameter_id:int, value: Any):
+    def update_parameter(self, _id: int, value: Any):
         """ Обновляет значение параметра. """
         self.execute("UPDATE monitoring SET `datetime` = %s, current_value = %s WHERE id = %s",
-                             [datetime.now(), value, parameter_id])
+                             [datetime.now(), value, _id])
 
-    def set_triggered(self, parameter_id: int) -> None:
+    def set_triggered(self, _id: int) -> None:
         """ Устанавливаем флаг выхода значение параметра за допустимые пределы """
-        self.execute("UPDATE monitoring SET triggered = true WHERE id = %s", [parameter_id])
+        self.execute("UPDATE monitoring SET triggered = true WHERE id = %s", [_id])
 
-    def reset_triggered(self, parameter_id: int) -> None:
+    def reset_triggered(self, _id: int) -> None:
         """ Устанавливаем флаг выхода значение параметра за допустимые пределы """
-        self.execute("UPDATE monitoring SET triggered = false WHERE id = %s", [parameter_id])
+        self.execute("UPDATE monitoring SET triggered = false WHERE id = %s", [_id])
 
