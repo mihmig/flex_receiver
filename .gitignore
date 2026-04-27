@@ -8,3 +8,5 @@ venv
 http-client.private.env.json
 .env
 tracks
+portainer_data
+
