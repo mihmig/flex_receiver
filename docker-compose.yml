@@ -71,6 +71,22 @@ services:
     mem_limit: 256m  # Ограничение памяти
     mem_reservation: 64m  # Резервирование памяти
 
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: gnss-pma
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8017:8081"
+    depends_on:
+      - flex-db
+    environment:
+      PMA_HOST: flex-db
+      PMA_PORT: 3306
+      PMA_USER: gnss
+      PMA_PASSWORD: gnss
+    networks:
+      - flex
+
   portainer:
     image: portainer/portainer-ce:latest
     container_name: portainer
