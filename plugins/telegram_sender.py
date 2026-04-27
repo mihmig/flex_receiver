@@ -5,7 +5,7 @@ import requests
 from retrying import retry
 
 from plugins.logger import log
-from plugins.storage_mysql import Storage
+from plugins.storage import Storage
 
 
 def retry_if_io_error(exception):

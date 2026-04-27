@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from plugins.max_sender import MaxSender
-from plugins.storage_mysql import Storage
+from plugins.storage import Storage
 
 storage = Storage()
 max_sender = MaxSender(storage)

@@ -10,7 +10,7 @@ import schedule
 
 from plugins.alert_service import AlertService
 from plugins.max_sender import MaxSender
-from plugins.storage_mysql import Storage
+from plugins.storage import Storage
 from plugins.telegram_sender import TelegramSender
 
 

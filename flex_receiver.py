@@ -16,7 +16,7 @@ from constants import *
 from packet_decoder import decode_packet, decode_flex_message
 from plugins.max_sender import MaxSender
 from plugins.monitoring_service import MonitoringService
-from plugins.storage_mysql import Storage
+from plugins.storage import Storage
 from plugins.telegram_sender import TelegramSender
 from plugins.timeout_checker import Checker
 

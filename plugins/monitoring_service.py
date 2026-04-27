@@ -1,7 +1,7 @@
 # Контроль устройств и их параметров.
 from constants import EVENT_TIME_FIELD
 from plugins.alert_service import AlertService
-from plugins.storage_mysql import Storage
+from plugins.storage import Storage
 
 
 class MonitoringService:

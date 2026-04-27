@@ -1,5 +1,5 @@
 # Тестирование отправки сообщения ботом
-from plugins.storage_mysql import Storage
+from plugins.storage import Storage
 from plugins.telegram_sender import TelegramSender
 
 storage = Storage()

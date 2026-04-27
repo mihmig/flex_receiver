@@ -3,7 +3,7 @@ import json
 from datetime import datetime
 from constants import *
 from plugins.monitoring_service import MonitoringService
-from plugins.storage_mysql import Storage
+from plugins.storage import Storage
 from plugins.logger import log
 
 
