@@ -1,0 +1,18 @@
+### Информация о боте
+GET https://api.telegram.org/bot{{telegram_bot_token}}/getMe
+Accept: application/json
+
+### Информация о web-хуке
+GET https://api.telegram.org/bot{{telegram_bot_token}}/getWebhookInfo
+Accept: application/json
+
+### Получение обновлений
+GET https://api.telegram.org/bot{{telegram_bot_token}}/getUpdates
+Accept: application/json
+
+### Отправка сообщения (GET)
+GET https://api.telegram.org/bot{{telegram_bot_token}}/sendmessage?chat_id=47254369&text=TEST
+
+
+### GNSS-TEST -868365203
+### InSide оповещения -1001882219961

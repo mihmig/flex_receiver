@@ -83,8 +83,10 @@ services:
     ports:
       - "127.0.0.1:9000:9000"
     networks:
-      - glonass_bot
-    restart: always
+      - flex
+    restart: unless-stopped
+    mem_limit: 256m  # Ограничение памяти
+    mem_reservation: 64m  # Резервирование памяти
 
 networks:
   flex:

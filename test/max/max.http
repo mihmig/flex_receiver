@@ -1,0 +1,41 @@
+### Получение информации о боте
+GET https://platform-api.max.ru/me
+Accept: application/json
+Authorization: {{max_bot_token}}
+
+
+### Получение списка всех групповых чатов
+GET https://platform-api.max.ru/chats
+Authorization: {{max_bot_token}}
+
+### Получение обновлений
+GET https://platform-api.max.ru/updates
+Authorization: {{max_bot_token}}
+
+> {% client.global.set("marker", response.body.marker); %}
+
+### Получение подписок (webhook-ов)
+GET https://platform-api.max.ru/subscriptions
+Authorization: {{max_bot_token}}
+
+
+### Отправить сообщение пользователю
+POST https://platform-api.max.ru/messages?chat_id=220733505
+Authorization: {{max_bot_token}}
+Content-Type: application/json
+
+{
+  "text": "Тестовое сообщение"
+}
+
+### -69206739206208 "Тестовая группа оповещения 1"
+### -69206750543936 "Тестовая группа оповещения 2"
+### -69620346601536 "Архангельск мобильный интернет"
+### Отправить сообщение в группу
+POST https://platform-api.max.ru/messages?chat_id=-69206750543936
+Authorization: {{max_bot_token}}
+Content-Type: application/json
+
+{
+  "text": "Тестовое сообщение"
+}
