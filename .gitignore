@@ -7,3 +7,4 @@ venv
 .venv
 http-client.private.env.json
 .env
+tracks

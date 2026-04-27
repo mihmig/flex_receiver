@@ -71,6 +71,21 @@ services:
     mem_limit: 256m  # Ограничение памяти
     mem_reservation: 64m  # Резервирование памяти
 
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    environment:
+      - TZ=Europe/Moscow
+    command: --base-path /portainer
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./portainer_data:/data
+    ports:
+      - "127.0.0.1:9000:9000"
+    networks:
+      - glonass_bot
+    restart: always
+
 networks:
   flex:
     driver: bridge

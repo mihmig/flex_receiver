@@ -103,7 +103,6 @@ consumer = Consumer(storage, monitoring_service)
 
 checker = Checker(storage, alert_service)
 aquarium = Aquarium(storage, alert_service)
-# inet_detector = InetDetector(storage)
 
 flex_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 flex_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)

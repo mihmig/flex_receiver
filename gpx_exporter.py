@@ -1,41 +1,103 @@
 # Выгрузка трека из БД в формате GPX
 # https://wiki.openstreetmap.org/wiki/RU:GPX (формат файла)
 # https://www.mygpsfiles.com/app/ (вроде есть replay)
-# https://gpx.studio/
+# https://gpx.studio/ (Можно в 3D, если выбрать картографическую подложку с поддержкой рельефа (например, OpenTopoMap или Mapbox)
 # https://brouter.de/brouter-web/ (можно редактировать)
+# https://gpxway.com/ (Просто посмотреть в 3D)
 #
 
 import json
 import re
-from config import config
+from datetime import datetime
 from plugins.db_mysql import Db
+from shapely.geometry import Point, Polygon
 
-db = Db(config['database'])
+from plugins.models import GpsPoint
+from plugins.spoofing_zone_filter import SpoofingZoneFilter
 
-start = '2024-01-29 11:45:00'
-end = '2024-01-29 12:25:00'
-track_name = re.sub(r'[ :]', '-', (start + '_' + end))
 
-records = db.get_data("SELECT `datetime`, decoded FROM message "
-                      "WHERE device_id = 1 AND message_type = 'A' AND decoded IS NOT NULL AND datetime BETWEEN %s AND %s",
-                      [start, end])
+def to_gpx_time(value):
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        return value.strftime("%Y-%m-%dT%H:%M:%SZ")
+    if isinstance(value, str):
+        for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%dT%H:%M:%SZ"):
+            try:
+                dt = datetime.strptime(value, fmt)
+                return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+            except ValueError:
+                continue
+    return str(value)
 
-text_file = open(f"{track_name}.gpx", "w")
-text_file.write(f'<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="flex_receiver">\n<name>{track_name}</name>\n')
+def create_gps_track(_track_name: str, _track_points: list[GpsPoint]) -> str:
+    track = [f'<?xml version="1.0" encoding="UTF-8"?>',
+             f'<gpx version="1.1" creator="flex_receiver">',
+             f'<trk><name>{_track_name}</name>',
+             f'<trkseg>']
+    for point in _track_points:
+        track.append(f'\t<trkpt lat="{point.lat}" lon="{point.lon}">')
+        track.append(f'\t\t<ele>{point.ele}</ele>')
+        if point.moment:
+            track.append(f'<time>{point.moment}</time>')
+        if point.speed:
+            track.append(f'<extensions><speed>{point.speed}</speed></extensions>')
+        track.append(f'</trkpt>')
+    track.append('</trkseg></trk></gpx>')
+    return '\n'.join(track)
 
-start_wpt = json.loads(records[0].get('decoded'))
-text_file.write(f'<wpt lat="{float(start_wpt.get("10"))/600000}" lon="{float(start_wpt.get("11"))/600000}">')
-text_file.write(f'<name>{track_name}</name></wpt>\n<trk><number>1</number>\n\t<trkseg>\n')
-# 10 Последняя валидная широта Угол широты, зафиксированный при получении последних валидных координат. В десятитысячных долях минуты.
-# Например, 55° 42,2389' будет представлено как 33422389
-# 11 Угол долготы, зафиксированный при получении последних валидных координат. В десятитысячных долях минуты.
-# Например, 37° 41,6063' будет представлено как 22616063
-# 12 Высота относительно уровня моря, зафиксированная при получении последних валидных координат: В дециметрах Например, 205 метров будет представлено как 2050 дециметров
-# 13 Скорость, зафиксированная при получении последних валидных координат. В км/ч
-# 14 Курс, зафиксированный при получении последних валидных координат.
+def save_gpx_track(track: str, _track_name: str):
+    text_file = open(f"tracks/{_track_name}.gpx", "w")
+    text_file.write(track)
+    text_file.close()
+
+db = Db()
+spoofing_zone_filter = SpoofingZoneFilter(db)
+device_id = 9
+start = '2026-04-26 00:00:00'
+end = '2026-04-26 23:59:59'
+# start = '2026-04-27 00:00:00'
+# end = '2026-04-27 23:59:00'
+
+device_info = db.get_line("SELECT id, imei, name, comment FROM device WHERE id = %s", [device_id])
+track_name = f"{device_info['name']}_{re.sub(r'[ :]', '-', (start + '_' + end))}"
+
+records = db.get_data("""SELECT id, decoded
+                        FROM message 
+                        WHERE device_id = %s 
+                        AND message_type = 'A'
+                        AND decoded IS NOT NULL
+                        AND datetime BETWEEN %s AND %s
+                      """,
+                      [device_id, start, end])
+
+# Фильтруем невалидные точки
+
+
+exported_points = 0
+dropped_points = 0
+
+track_points: list[GpsPoint] = []
 for record in records:
     data = json.loads(record.get('decoded'))
-    text_file.write(f'\t<trkpt lat="{float(data.get("10"))/600000}" lon="{float(data.get("11"))/600000}"><ele>{float(data.get("12"))/10}</ele></trkpt>\n')
+    lat = float(data.get("10"))/600000
+    lon = float(data.get("11"))/600000
 
-text_file.write(f'</trkseg></trk></gpx>\n')
-print('ok')
+    if spoofing_zone_filter.point_in_spoofed_zone(lon, lat):
+        db.execute("DELETE FROM message WHERE id = %s", [record['id']])
+        dropped_points += 1
+        continue
+    gps_point = GpsPoint(to_gpx_time(data.get("3")),
+                         lon,
+                         lat,
+                         data.get("12") / 10,  # elevation
+                         data.get("13") # speed
+                         )
+
+    track_points.append(gps_point)
+    exported_points += 1
+gps_track = create_gps_track(track_name, track_points)
+save_gpx_track(gps_track, track_name)
+print(f'Создан трек: {track_name}')
+print(f'Экспортировано точек: {exported_points}')
+print(f'Отброшено точек: {dropped_points}')

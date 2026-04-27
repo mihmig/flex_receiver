@@ -5,6 +5,21 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONUNBUFFERED": "1",
+                "DATABASE_HOST": "localhost",
+                "DATABASE_PORT": "8003",
+                "DATABASE_NAME": "gnss",
+                "DATABASE_USER": "gnss",
+                "DATABASE_PASSWORD": "gnss"
+            }
+        },
+        {
             "name": "Python Debugger: flex_receiver.py",
             "type": "debugpy",
             "request": "launch",
