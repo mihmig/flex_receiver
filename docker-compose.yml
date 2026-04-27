@@ -71,12 +71,12 @@ services:
     mem_limit: 256m  # Ограничение памяти
     mem_reservation: 64m  # Резервирование памяти
 
-  phpmyadmin:
+  gnss-pma:
     image: phpmyadmin:latest
     container_name: gnss-pma
     restart: unless-stopped
     ports:
-      - "127.0.0.1:8017:8081"
+      - "127.0.0.1:8017:80"
     depends_on:
       - flex-db
     environment:
