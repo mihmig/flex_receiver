@@ -10,10 +10,10 @@ import json
 import re
 from datetime import datetime
 from plugins.db_mysql import Db
-from shapely.geometry import Point, Polygon
 
 from plugins.models import GpsPoint
 from plugins.spoofing_zone_filter import SpoofingZoneFilter
+from plugins.storage import Storage
 
 
 def to_gpx_time(value):
@@ -51,25 +51,20 @@ def save_gpx_track(track: str, _track_name: str):
     text_file.write(track)
     text_file.close()
 
-db = Db()
-spoofing_zone_filter = SpoofingZoneFilter(db)
+storage = Storage()
+spoofing_zone_filter = SpoofingZoneFilter(storage)
+
 device_id = 9
-start = '2026-04-26 00:00:00'
-end = '2026-04-26 23:59:59'
+device_info = storage.get_device(device_id)
+
+start = '2026-04-28 00:00:00'
+end = '2026-04-28 23:59:59'
 # start = '2026-04-27 00:00:00'
 # end = '2026-04-27 23:59:00'
 
-device_info = db.get_line("SELECT id, imei, name, comment FROM device WHERE id = %s", [device_id])
 track_name = f"{device_info['name']}_{re.sub(r'[ :]', '-', (start + '_' + end))}"
 
-records = db.get_data("""SELECT id, decoded
-                        FROM message 
-                        WHERE device_id = %s 
-                        AND message_type = 'A'
-                        AND decoded IS NOT NULL
-                        AND datetime BETWEEN %s AND %s
-                      """,
-                      [device_id, start, end])
+records = storage.get_device_messages(device_id, start, end)
 
 # Фильтруем невалидные точки
 
@@ -84,7 +79,7 @@ for record in records:
     lon = float(data.get("11"))/600000
 
     if spoofing_zone_filter.point_in_spoofed_zone(lon, lat):
-        db.execute("DELETE FROM message WHERE id = %s", [record['id']])
+        # db.execute("DELETE FROM message WHERE id = %s", [record['id']])
         dropped_points += 1
         continue
     gps_point = GpsPoint(to_gpx_time(data.get("3")),

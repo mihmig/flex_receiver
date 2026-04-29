@@ -1,7 +1,7 @@
 # Обработчик входящих пакетов от устройств
 from functools import reduce
 
-from constants import *
+from plugins.constants import *
 # Декодирует входящие данные
 # 1. Определяет тип пакета
 # 2. Декодирует данные (если таковые есть в пакете)
@@ -11,7 +11,7 @@ from constants import *
 # б) Данные, которые нужно вернуть устройству (для пакетов, требующих ответа)
 # в) Список декодированных FLEX-структур данных (если таковые есть в пакете)
 # г) Сообщение о разборе пакета (ошибка или информационное)
-from fields import flex_fields, decode_field
+from plugins.fields import flex_fields, decode_field
 
 digital_sensor_list = [45, 46, 47, 48, 49, 50, 51, 52]
 

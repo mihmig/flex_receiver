@@ -9,9 +9,11 @@
             "type": "debugpy",
             "request": "launch",
             "program": "${file}",
+            "cwd": "${workspaceFolder}",
             "console": "integratedTerminal",
             "env": {
                 "PYTHONUNBUFFERED": "1",
+                "PYTHONPATH": "${workspaceFolder}",
                 "DATABASE_HOST": "localhost",
                 "DATABASE_PORT": "8003",
                 "DATABASE_NAME": "gnss",
@@ -24,9 +26,11 @@
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/flex_receiver.py",
+            "cwd": "${workspaceFolder}",
             "console": "integratedTerminal",
             "env": {
                 "PYTHONUNBUFFERED": "1",
+                "PYTHONPATH": "${workspaceFolder}",
                 "DATABASE_HOST": "localhost",
                 "DATABASE_PORT": "8003",
                 "DATABASE_NAME": "gnss",

@@ -8,7 +8,7 @@ from datetime import datetime
 
 import schedule
 
-from constants import DEVICE_STATE_ONLINE, DEVICE_STATE_OFFLINE
+from plugins.constants import DEVICE_STATE_ONLINE, DEVICE_STATE_OFFLINE
 from plugins.alert_service import AlertService
 from plugins.max_sender import MaxSender
 from plugins.storage import Storage

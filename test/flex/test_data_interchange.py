@@ -1,7 +1,7 @@
 # Тестирование цикла обмена данными
 import socket
 
-from constants import LOCAL_PORT
+from plugins.constants import LOCAL_PORT
 
 socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 socket.connect(('localhost', LOCAL_PORT))

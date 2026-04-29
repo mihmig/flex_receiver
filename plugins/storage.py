@@ -94,3 +94,17 @@ class Storage(Db):
         """ Устанавливаем флаг выхода значение параметра за допустимые пределы """
         self.execute("UPDATE monitoring SET triggered = false WHERE id = %s", [_id])
 
+    def get_active_geo_zones(self) -> list[dict]:
+        """ Возвращает список активных геозон. """
+        return self.get_data("SELECT id, name, tags, source_geo, alert, type FROM geo_zone WHERE enabled = true")
+
+    def get_device_messages(self, device_id, start, end):
+        return self.get_data("""SELECT id, decoded
+                        FROM message 
+                        WHERE device_id = %s 
+                        AND message_type = 'A'
+                        AND decoded IS NOT NULL
+                        AND datetime BETWEEN %s AND %s
+                      """,
+                      [device_id, start, end])
+    

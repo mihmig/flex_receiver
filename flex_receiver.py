@@ -9,13 +9,14 @@ import time
 from plugins.alert_service import AlertService
 from plugins.aquarium import Aquarium
 from plugins.logger import log
-from crc8_flex import crc8
-from consumer import Consumer
+from plugins.crc8_flex import crc8
+from plugins.consumer import Consumer
 
-from constants import *
-from packet_decoder import decode_packet, decode_flex_message
+from plugins.constants import *
+from plugins.packet_decoder import decode_packet, decode_flex_message
 from plugins.max_sender import MaxSender
 from plugins.monitoring_service import MonitoringService
+from plugins.spoofing_zone_filter import SpoofingZoneFilter
 from plugins.storage import Storage
 from plugins.telegram_sender import TelegramSender
 from plugins.timeout_checker import Checker
@@ -99,7 +100,8 @@ telegram_sender = TelegramSender(storage)
 max_sender = MaxSender(storage)
 alert_service = AlertService(storage, telegram_sender, max_sender)
 monitoring_service = MonitoringService(storage, alert_service)
-consumer = Consumer(storage, monitoring_service)
+spoofing_zone_filter = SpoofingZoneFilter(storage)
+consumer = Consumer(storage, monitoring_service, spoofing_zone_filter)
 
 checker = Checker(storage, alert_service)
 aquarium = Aquarium(storage, alert_service)

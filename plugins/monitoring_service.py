@@ -1,5 +1,5 @@
 # Контроль устройств и их параметров.
-from constants import EVENT_TIME_FIELD
+from plugins.constants import EVENT_TIME_FIELD
 from plugins.alert_service import AlertService
 from plugins.storage import Storage
 

@@ -116,21 +116,32 @@ CREATE INDEX `monitoring__device_id_idx` ON gnss.`monitoring` (device_id);
 INSERT INTO gnss.monitoring (id, device_id, parameter_id, event_id, datetime, current_value, min_value, max_value, below_min_message, above_max_message, no_data_message, event_message, alert, triggered)
 VALUES (1, 1, 45, null, '2023-01-11 23:17:04', null, -10.000, -5.000, 'Температура на улице меньше заданного значения', 'Температура на улице больше заданного значения', 'Нет данных о температуре', null, 1, 0);
 
+DROP TABLE gnss.geo_zone;
 -- https://mariadb.com/kb/en/geometry-types/
 CREATE TABLE gnss.geo_zone (
     id INT AUTO_INCREMENT COMMENT 'id записи в БД',
+    parent_id INT COMMENT 'id родительской зоны',
+    `name` VARCHAR(128) NOT NULL COMMENT 'Имя',
+    `source` VARCHAR(128) NOT NULL COMMENT 'Источник',
+    tags VARCHAR(256) NOT NULL COMMENT 'Теги',
+    source_geo TEXT NOT NULL COMMENT 'Координаты вершин/точек/центра',
+    alert BOOL NOT NULL DEFAULT false COMMENT 'Уведомлять о входе-выходе в зону',
+    enabled BOOL NOT NULL DEFAULT false COMMENT 'Разрешено использовать зону',
     type ENUM('CIRCLE','POLIGON','LINE') NOT NULL COMMENT 'Тип геозоны',
-    center POINT COMMENT 'Центр круга',
-    radius INT COMMENT 'Радиус круга, м.',
-    `poligon` POLYGON COMMENT 'Точки полигона',
-    `line` MULTIPOINT COMMENT 'Точки трека',
+    created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Дата внесения в БД',
+    updated TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Дата последнего изменнения',
     PRIMARY KEY (`id`)
 );
 ALTER TABLE gnss.geo_zone COMMENT='Геозоны';
 
 -- Круг радиусом 10 км от центра Ярославля
-INSERT INTO gnss.geo_zone (type, center, radius) VALUES ('CIRCLE',
-                                                         PointFromText('POINT(39.90991271972598 57.62478929076413)'),
-                                                         10000);
-
-SELECT ST_AsText(center), ST_X(center), ST_Y(center) FROM gnss.geo_zone WHERE id = 2;
+# INSERT INTO gnss.geo_zone (type, center, radius) VALUES ('CIRCLE',
+#                                                          PointFromText('POINT(39.90991271972598 57.62478929076413)'),
+#                                                          10000);
+#
+# SELECT ST_AsText(center), ST_X(center), ST_Y(center) FROM gnss.geo_zone WHERE id = 2;
+# ,
+#     center POINT COMMENT 'Центр круга',
+#     radius INT COMMENT 'Радиус круга, м.',
+#     `poligon` POLYGON COMMENT 'Точки полигона',
+#     `line` MULTIPOINT COMMENT 'Точки трека',

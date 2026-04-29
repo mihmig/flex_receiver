@@ -1,7 +1,7 @@
 # Модуль обработки FLEX-пакетов данных
 import json
 from datetime import datetime
-from constants import *
+from plugins.constants import *
 from plugins.monitoring_service import MonitoringService
 from plugins.spoofing_zone_filter import SpoofingZoneFilter
 from plugins.storage import Storage
@@ -39,9 +39,14 @@ class Consumer:
             self.debug_message(imei, packet_type, decoded)
             event_id = decoded['2']
             event_time = decoded['3']
-            lat = float(decoded.get("10")) / 600000
-            lon = float(data.get("11")) / 600000
-            self.storage.save_message(device_id, event_id, event_time, packet_type, data, json.dumps(decoded))
+            spoofed = False
+            if "10" in decoded and "11" in decoded:
+                lat = float(decoded.get("10")) / 600000
+                lon = float(data.get("11")) / 600000
+                spoofed =  self.spoofing_zone_filter.point_in_spoofed_zone(lon, lat)
+            if not spoofed:
+                self.storage.save_message(device_id, event_id, event_time, packet_type, data, json.dumps(decoded))
+
             self.monitoring_service.do_monitoring(device_id, decoded)
         elif packet_type == PACKET_TYPE_ERROR:
             self.storage.save_message(device_id, 0, now, packet_type, data, json.dumps(decoded))

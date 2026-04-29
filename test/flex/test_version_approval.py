@@ -1,5 +1,5 @@
 # Тестирование пакета согласования версий протоколов
-from packet_decoder import decode_version_approval, get_structure_length
+from plugins.packet_decoder import decode_version_approval, get_structure_length
 
 # version_approval = b'\x40\x4E\x54\x43\x01\x00\x00\x00\x00\x00\x00\x00\x13\x00\x8D\x86\x2A\x3E\x46\x4C\x45\x58\xB0\x0A\x0A\x45\xFF\xFE\x70\x02\x00\x08\x00\x00\x00'
 # fields = decode_version_approval(version_approval)
