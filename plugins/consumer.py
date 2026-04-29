@@ -3,14 +3,20 @@ import json
 from datetime import datetime
 from constants import *
 from plugins.monitoring_service import MonitoringService
+from plugins.spoofing_zone_filter import SpoofingZoneFilter
 from plugins.storage import Storage
 from plugins.logger import log
 
 
 class Consumer:
-    def __init__(self, storage: Storage, p_monitoring_service: MonitoringService):
-        self.storage = storage
+    def __init__(self,
+                 p_storage: Storage,
+                 p_monitoring_service: MonitoringService,
+                 p_spoofing_zone_filter: SpoofingZoneFilter
+                 ):
+        self.storage = p_storage
         self.monitoring_service = p_monitoring_service
+        self.spoofing_zone_filter = p_spoofing_zone_filter
 
     def consume_flex_message(self, imei: str, packet_type: str, data: bytes | None, decoded: dict | None):
         """ Обрабатывает декодированное FLEX-сообщение"""
@@ -33,6 +39,8 @@ class Consumer:
             self.debug_message(imei, packet_type, decoded)
             event_id = decoded['2']
             event_time = decoded['3']
+            lat = float(decoded.get("10")) / 600000
+            lon = float(data.get("11")) / 600000
             self.storage.save_message(device_id, event_id, event_time, packet_type, data, json.dumps(decoded))
             self.monitoring_service.do_monitoring(device_id, decoded)
         elif packet_type == PACKET_TYPE_ERROR:
