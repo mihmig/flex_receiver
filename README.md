@@ -78,7 +78,7 @@ docker-compose up -d --build flex
 * docker exec flex-db /bin/bash -c 'mariadb-dump gnss -p$MYSQL_ROOT_PASSWORD >/backup/gnss.sql'
 
 ### Восстановление
-* docker exec flex-db /bin/bash -c 'mariadb gnss -p$MYSQL_ROOT_PASSWORD </backup/gnss.sql'
+* docker exec flex-db /bin/bash -c 'mariadb gnss -p\$MYSQL_ROOT_PASSWORD </backup/gnss.sql'
 * Для windows 
   * docker exec flex-db /bin/bash -c "mariadb gnss -p$MYSQL_ROOT_PASSWORD </backup/gnss.sql"
 

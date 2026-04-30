@@ -1,3 +1,18 @@
+
+
+-- SQL‑запрос для подсчёта количества записей в таблице message за указанный период с группировкой по часам:
+-- docker logs --since "2026-04-26T05:00:00" --until "2026-04-26T09:00:00" flex
+SELECT
+    DATE_FORMAT(`datetime`, '%Y-%m-%d %H:00:00') AS hour_interval,
+    COUNT(*) AS message_count
+FROM `message`
+WHERE device_id = 8
+  AND `datetime` >= '2026-04-26 05:00:00'
+  AND `datetime` < '2026-04-26 10:00:00'
+GROUP BY DATE_FORMAT(`datetime`, '%Y-%m-%d %H')
+ORDER BY hour_interval;
+
+
 -- Очищаем таблицу от записей ботов (как они туда попадают?)
 DELETE FROM message WHERE device_id=6;
 -- Очищаем таблицу message от записей старше 2-х недель
