@@ -134,9 +134,16 @@ DO
 2. Уведомляем о возврате параметра в норму
 
 ### Запуск локально
-PYTHONUNBUFFERED=1;DATABASE_HOST=localhost;DATABASE_PORT=8003;DATABASE_NAME=gnss;DATABASE_USER=gnss;DATABASE_PASSWORD=gnss
-
-
+#### Настройка python
+cd /opt/flex_receiver/
+apt install python3.11-venv
+python3 -m venv .venv
+source .venv/bin/activate
+pip3 install -r requirements.txt
+PYTHONPATH=. PYTHONUNBUFFERED=1 \
+DATABASE_HOST=localhost DATABASE_PORT=8003 \
+DATABASE_NAME=gnss DATABASE_USER=gnss DATABASE_PASSWORD=gnss \
+python3 test/geozones/test_import_from_axenta.py
 ### Обслуживание
 
 

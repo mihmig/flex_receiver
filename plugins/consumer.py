@@ -42,9 +42,11 @@ class Consumer:
             spoofed = False
             if "10" in decoded and "11" in decoded:
                 lat = float(decoded.get("10")) / 600000
-                lon = float(data.get("11")) / 600000
+                lon = float(decoded.get("11")) / 600000
                 spoofed =  self.spoofing_zone_filter.point_in_spoofed_zone(lon, lat)
-            if not spoofed:
+            if spoofed:
+                log(f'{imei}: spoofed')
+            else:
                 self.storage.save_message(device_id, event_id, event_time, packet_type, data, json.dumps(decoded))
 
             self.monitoring_service.do_monitoring(device_id, decoded)

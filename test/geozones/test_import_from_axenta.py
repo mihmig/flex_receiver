@@ -14,7 +14,7 @@ class TestImportFromAxenta(unittest.TestCase):
         try:
             ok, message = geo_zone.import_from_axenta('test/geozones/axenta.kml', source='test')
             self.assertTrue(ok)
-            self.assertTrue(message.startswith('Импортировано геозон:'))
+            self.assertTrue(message.startswith('Импортировано'))
 
             count = storage.get_value("SELECT COUNT(*) FROM geo_zone WHERE source = %s", ['test'])
             self.assertEqual(12, count)

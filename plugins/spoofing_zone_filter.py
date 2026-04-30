@@ -12,7 +12,7 @@ class SpoofingZoneFilter:
     def __init__(self, _storage: Storage):
         self.storage = _storage
         self.active_geo_zones = self.storage.get_active_geo_zones()
-        self.polygon_zones: list[Polygon] = []
+        self.polygon_zones: list[PolygonZone] = []
         self.circle_zones: list[CircleZone] = []
 
         for geo_zone in self.active_geo_zones:
@@ -60,7 +60,7 @@ class SpoofingZoneFilter:
         :return: True - если находится, False - если нет
         """
         point = Point(_lon, _lat)
-        in_polygon = any(polygon.covers(point) for polygon in self.polygon_zones)
+        in_polygon = any(polygon_zone.polygon.covers(point) for polygon_zone in self.polygon_zones)
         if in_polygon:
             return True
 

@@ -57,8 +57,8 @@ spoofing_zone_filter = SpoofingZoneFilter(storage)
 device_id = 9
 device_info = storage.get_device(device_id)
 
-start = '2026-04-28 00:00:00'
-end = '2026-04-28 23:59:59'
+start = '2026-04-29 00:00:00'
+end = '2026-04-29 23:59:59'
 # start = '2026-04-27 00:00:00'
 # end = '2026-04-27 23:59:00'
 
