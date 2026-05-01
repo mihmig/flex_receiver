@@ -21,7 +21,8 @@ class Db:
             'maxsize': 5,
             'pre_create_num': 3,
             'name': 'pool1',
-            'charset': 'utf8mb4'
+            'charset': 'utf8mb4',
+            'init_command': "SET time_zone = '+00:00'"
         })
         else:
             self.pool = pymysqlpool.ConnectionPool(**config)

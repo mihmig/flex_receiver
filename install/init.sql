@@ -134,6 +134,12 @@ CREATE TABLE gnss.geo_zone (
 );
 ALTER TABLE gnss.geo_zone COMMENT='Геозоны';
 
+ALTER TABLE gnss.monitoring ADD COLUMN with_device BOOL DEFAULT FALSE COMMENT 'Добавлять имя устройства в сообщениях';
+ALTER TABLE gnss.message ADD COLUMN moment TIMESTAMP NOT NULL
+    COMMENT 'Дата и время регистрации события';
+
+ALTER TABLE gnss.message ADD COLUMN received TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    COMMENT 'Дата и время получения события';
 -- Круг радиусом 10 км от центра Ярославля
 # INSERT INTO gnss.geo_zone (type, center, radius) VALUES ('CIRCLE',
 #                                                          PointFromText('POINT(39.90991271972598 57.62478929076413)'),

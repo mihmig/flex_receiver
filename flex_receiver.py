@@ -8,6 +8,8 @@ import time
 
 from plugins.alert_service import AlertService
 from plugins.aquarium import Aquarium
+from plugins.flex_constants import HANDSHAKE_ANSWER, VERSION_APPROVAL_ANSWER, PACKET_C_ANSWER, PACKET_TYPE_HANDSHAKE, \
+    PACKET_TYPE_APPROVAL, PACKET_TYPE_PING, PACKET_TYPE_A, PACKET_TYPE_C, PACKET_TYPE_T, PACKET_TYPE_ERROR
 from plugins.logger import log
 from plugins.crc8_flex import crc8
 from plugins.consumer import Consumer

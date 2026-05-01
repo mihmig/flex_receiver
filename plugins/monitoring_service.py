@@ -1,5 +1,5 @@
 # Контроль устройств и их параметров.
-from plugins.constants import EVENT_TIME_FIELD
+from plugins.flex_constants import FIELD_EVENT_TIME
 from plugins.alert_service import AlertService
 from plugins.storage import Storage
 
@@ -11,7 +11,7 @@ class MonitoringService:
 
     def do_monitoring(self, device_id: int, decoded: dict) -> None:
         """ Контроль параметров на выход за установленные рамки и возвращение в норму """
-        moment_str = decoded.get(EVENT_TIME_FIELD)
+        moment_str = decoded.get(FIELD_EVENT_TIME)
         device = self.storage.get_device(device_id)
         if device is None:
             return

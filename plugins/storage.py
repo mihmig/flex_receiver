@@ -1,5 +1,6 @@
 # Плагин. Хранилище устройств в БД MariaDb(Mysql)
-from datetime import datetime
+import json
+from datetime import datetime, timezone
 from typing import Any
 
 from plugins.db_mysql import Db
@@ -42,11 +43,15 @@ class Storage(Db):
     def update_device_state(self, device: dict, state: str) -> None:
         self.execute("UPDATE device SET state = %s WHERE id = %s", [state, device['id']])
 
-    def save_message(self, device_id: int, event_id: int, _datetime: str,
-                     message_type: str, data: bytes | None, decoded: str | None):
-        self.insert('INSERT INTO message (device_id, event_id, `datetime`, message_type, data, decoded)'
-                    ' VALUES (%s, %s, %s, %s, %s, %s)',
-                    [device_id, event_id, _datetime, message_type, data, decoded])
+    def save_message(self, device_id: int, event_id: int,
+                     message_type: str, data: bytes | None, decoded: dict | None):
+        moment = datetime.fromtimestamp(decoded.get('3'), tz=timezone.utc) if decoded else None
+        self.insert("""INSERT INTO message (device_id, event_id, message_type,
+                                            data, decoded, moment)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                    """,
+                    [device_id, event_id, message_type,
+                     data, json.dumps(decoded), moment])
 
     def get_device_monitoring(self, device_id: int) -> dict:
         """ Возвращает набор параметров для мониторинга данного устройства """
