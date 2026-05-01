@@ -51,11 +51,21 @@ class Storage(Db):
                     VALUES (%s, %s, %s, %s, %s, %s)
                     """,
                     [device_id, event_id, message_type,
-                     data, json.dumps(decoded), moment])
+                     data, json.dumps(decoded) if decoded is not None else None, moment])
 
-    def get_device_monitoring(self, device_id: int) -> dict:
-        """ Возвращает набор параметров для мониторинга данного устройства """
-        return self.get_dict('SELECT * FROM monitoring WHERE device_id=%s', [device_id])
+    def get_device_monitoring_param(self, device_id: int, parameter_id: int) -> dict:
+        """
+        Возвращает информацию о контролируемом параметре устройства
+        :param device_id: id устройства
+        :param parameter_id: id параметра
+        :return: словарь с данными
+        """
+        """  """
+        return self.get_line("""
+                             SELECT * FROM monitoring 
+                             WHERE device_id = %s AND parameter_id = %s
+                 """,
+                      [device_id, parameter_id])
 
     def get_system_parameters(self) -> dict:
         """ Возвращает все параметры системы. """
@@ -108,8 +118,9 @@ class Storage(Db):
                         FROM message 
                         WHERE device_id = %s 
                         AND message_type = 'A'
-                        AND decoded IS NOT NULL
-                        AND datetime BETWEEN %s AND %s
+                        AND decoded IS NOT NULL AND decoded <> 'null'
+                        AND moment BETWEEN %s AND %s
+                        ORDER BY moment
                       """,
                       [device_id, start, end])
     

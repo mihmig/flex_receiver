@@ -1,3 +1,22 @@
+-- После восстановления БД из копии "с прода" - очищаем поля alert
+UPDATE device SET alert = false;
+UPDATE monitoring SET alert = false;
+
+-- Новый параметр - контроль аквариума (выключен на копии)
+INSERT INTO settings (`key`, value, comment)
+VALUES ('aquarium_send', 'false', 'Ежедневный контроль параметров аквариума')
+ON DUPLICATE KEY UPDATE value = 'false';
+-- Очищаем ненужные сообщения о вспомогательных пакетах a и h
+DELETE FROM message WHERE BINARY message_type = 'a' OR BINARY message_type = 'h';
+
+-- Сообщения по конкретному устройству за определённый период
+SELECT id, message_type, decoded
+                        FROM message
+                        WHERE device_id = 1
+                        AND BINARY message_type = 'A'
+                        AND decoded IS NOT NULL
+                        AND moment BETWEEN '2026-04-30 00:00:00' and '2026-04-30 23:59:59'
+                        ORDER BY moment;
 -- Очищаем таблицу от записей ботов (как они туда попадают?)
 DELETE FROM message WHERE device_id=6;
 -- Очищаем таблицу message от записей старше 2-х недель

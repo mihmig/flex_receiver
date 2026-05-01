@@ -23,31 +23,37 @@ class Aquarium:
         schedule.every().day.at("10:00").do(self.send_notification)
         schedule.every().day.at("20:00").do(self.send_notification)
 
-    # Возвращает состояние параметра в человекочитаемом виде
-    # и необходимость внимания (True - требует внимания, False - норма)
     def get_param_state_and_alert(self, parameter_id: int, messages: dict) -> (str, bool):
-        p = self.storage.get_line("""
-            SELECT id, parameter_id, event_id, current_value, min_value, max_value,
-                 `datetime`, timeout, no_data_message,
-                 below_min_message, above_max_message, 
-                 `alert`, triggered, telegram_chat_id, max_chat_id
-                 FROM monitoring WHERE device_id = %s AND parameter_id = %s
-                 """,
-                                  [self.device_id, parameter_id])
+        """
+        Возвращает состояние параметра в человекочитаемом виде
+        и необходимость внимания (True - требует внимания, False - норма)
+        :param parameter_id: идентификатор параметра
+        :param messages: набор из 3-х шаблонов сообщений (для случаев, когда параметр ниже, в норме или выше нормы)
+        :return: итоговое состояние и признак - требуется ли звуковое оповещение
+        (если параметр в норме, то звуковое оповещение не требуется)
+        """
 
-        timeout = 3600 if p['timeout'] is None else p['timeout']
-        no_data_message = 'Нет данных длительное время' if p['no_data_message'] is None else p['no_data_message']
-        if p['datetime'] is None or p['datetime'] < datetime.now() - timedelta(seconds=timeout):
+        param = self.storage.get_device_monitoring_param(self.device_id, parameter_id)
+
+        timeout = 3600 if param['timeout'] is None else param['timeout']
+        no_data_message = 'Нет данных длительное время' if param['no_data_message'] is None else param['no_data_message']
+        if param['datetime'] is None or param['datetime'] < datetime.now() - timedelta(seconds=timeout):
             return no_data_message, True
-        value_str = str(round(p['current_value']))
-        if p['current_value'] < p['min_value']:
+        value_str = str(round(param['current_value']))
+        if param['current_value'] < param['min_value']:
             return messages['below'].replace('%VALUE%', value_str), True
-        elif p['current_value'] > p['max_value']:
+        elif param['current_value'] > param['max_value']:
             return messages['above'].replace('%VALUE%', value_str), True
         else:
             return messages['normal'].replace('%VALUE%', value_str), False
 
-    def send_notification(self):
+    def send_notification(self) -> None:
+        """
+        Отправка текущего статуса параметров аквариума
+        """
+        if not self.storage.get_system_param('aquarium_send') == 'true':
+            return
+
         disable_notification = True  # Сообщение в Телеграм отправлять со звуковым уведомлением
 
         info, alert = self.get_param_state_and_alert(49, {'normal': '🟢 Температура воды (подача): %VALUE% °C',

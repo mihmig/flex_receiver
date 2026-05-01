@@ -29,10 +29,12 @@ class Consumer:
             log(f'{imei}: consumed PING')
         elif packet_type == PACKET_TYPE_HANDSHAKE:
             self.storage.update_last_alive(device_id)
-            self.storage.save_message(device_id, 0, packet_type, data, None)
+            # Отключено, не требуется
+            # self.storage.save_message(device_id, 0, packet_type, data, None)
             log(f'{imei}: consumed HANDSHAKE')
         elif packet_type == PACKET_TYPE_APPROVAL:
-            self.storage.save_message(device_id, 0, packet_type, data, None)
+            # Отключено, не требуется
+            # self.storage.save_message(device_id, 0, packet_type, data, None)
             log('consumed PACKET_TYPE_APPROVAL')
         elif packet_type == PACKET_TYPE_A or packet_type == PACKET_TYPE_C or packet_type == PACKET_TYPE_T:
             self.storage.update_last_alive(device_id)

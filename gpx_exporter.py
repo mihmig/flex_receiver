@@ -9,7 +9,6 @@
 import json
 import re
 from datetime import datetime
-from plugins.db_mysql import Db
 
 from plugins.models import GpsPoint
 from plugins.spoofing_zone_filter import SpoofingZoneFilter
@@ -54,11 +53,11 @@ def save_gpx_track(track: str, _track_name: str):
 storage = Storage()
 spoofing_zone_filter = SpoofingZoneFilter(storage)
 
-device_id = 9
+device_id = 1
 device_info = storage.get_device(device_id)
 
-start = '2026-04-29 00:00:00'
-end = '2026-04-29 23:59:59'
+start = '2026-04-30 00:00:00'
+end = '2026-04-30 23:59:59'
 # start = '2026-04-27 00:00:00'
 # end = '2026-04-27 23:59:00'
 
