@@ -1,5 +1,6 @@
 # Тестирование пакета согласования версий протоколов
-from plugins.packet_decoder import decode_version_approval, get_structure_length
+from plugins.flex_constants import FLEX_BITFIELD_SIZE_V1
+from plugins.packet_decoder import decode_fields, get_structure_length
 
 # version_approval = b'\x40\x4E\x54\x43\x01\x00\x00\x00\x00\x00\x00\x00\x13\x00\x8D\x86\x2A\x3E\x46\x4C\x45\x58\xB0\x0A\x0A\x45\xFF\xFE\x70\x02\x00\x08\x00\x00\x00'
 # fields = decode_version_approval(version_approval)
@@ -10,6 +11,6 @@ from plugins.packet_decoder import decode_version_approval, get_structure_length
 # print(fields)
 
 version_approval = b'\x40\x4E\x54\x43\x01\x00\x00\x00\x00\x00\x00\x00\x13\x00\xC5\xCE\x2A\x3E\x46\x4C\x45\x58\xB0\x0A\x0A\x45\xFF\xF8\x3E\x02\x00\x08\x00\x00\x00'
-fields = decode_version_approval(version_approval)
+fields = decode_fields(version_approval, ord(FLEX_BITFIELD_SIZE_V1))
 print(fields)
 print('Flex data length in bytes: ', get_structure_length(fields))

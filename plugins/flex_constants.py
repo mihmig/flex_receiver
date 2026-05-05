@@ -4,18 +4,34 @@ NTCB_HEADER = b'@NTC'
 HANDSHAKE_HEADER = b'*>S:'
 FLEX_HEADER = b'*>FLEX'
 FLEX_PROTOCOL_CODE = b'\xB0'
+# Протокол версии 1
 FLEX_PROTOCOL_VERSION_1 = b'\x0A'
 FLEX_STRUCT_VERSION_1 = b'\x0A'
-FLEX_DATASIZE_V1 = b'\x45' # 69 бит (округлённо 9 байт)
+FLEX_BITFIELD_SIZE_V1 = b'\x45' # 69 бит (округлённо 9 байт)
+# Протокол версии 2
+FLEX_PROTOCOL_VERSION_2 = b'\x14'
+FLEX_STRUCT_VERSION_2 = b'\x14'
+FLEX_BITFIELD_SIZE_V2 = b'\x7a' # 122 бита (округлённо 16 байт)
+# Протокол версии 3
+FLEX_PROTOCOL_VERSION_3 = b'\x1e'
+FLEX_STRUCT_VERSION_3 = b'\x1e'
+FLEX_BITFIELD_SIZE_V3 = b'\xff' # 255 бит (округлённо 32 байта)
+
 # Подтверждение handshake
 HANDSHAKE_ANSWER = b'\x40\x4E\x54\x43\x00\x00\x00\x00\x01\x00\x00\x00\x03\x00\x45\x5E\x2A\x3C\x53'
-# Подтверждение согласования версий протоколов
-VERSION_APPROVAL_ANSWER = b'\x40\x4E\x54\x43\x00\x00\x00\x00\x01\x00\x00\x00\x09\x00\xB1\xA0\x2A\x3C\x46\x4C\x45\x58\xB0\x0A\x0A'
+# Подтверждение согласования версий протоколов (внимание - версия протокола и версия струвктуры могут отличаться)
+VERSION_APPROVAL_ANSWER = b'\x40\x4E\x54\x43\x00\x00\x00\x00\x01\x00\x00\x00\x09\x00\xB1\xA0\x2A\x3C\x46\x4C\x45\x58\xB0'
+VERSION_APPROVAL_ANSWER_1 = b'\x40\x4E\x54\x43\x00\x00\x00\x00\x01\x00\x00\x00\x09\x00\xB1\xA0\x2A\x3C\x46\x4C\x45\x58\xB0\x0A\x0A'
+VERSION_APPROVAL_ANSWER_2 = b'\x40\x4E\x54\x43\x00\x00\x00\x00\x01\x00\x00\x00\x09\x00\xB1\xA0\x2A\x3C\x46\x4C\x45\x58\xB0\x14\x14'
+#                               40  4e  54  43  00  00  00  00  01  00  00  00  09  00  b1  a0  2a  3c  46  4c  45  58  b0  1e  1e
+VERSION_APPROVAL_ANSWER_3 = b'\x40\x4E\x54\x43\x00\x00\x00\x00\x01\x00\x00\x00\x09\x00\xB1\xA0\x2A\x3C\x46\x4C\x45\x58\xB0\x1E\x1E'
 # Ответ на пакет типа С
 PACKET_C_ANSWER = b'\x7E\x43\xB9'
 PACKET_A_HEADER = b'~A'
 PACKET_C_HEADER = b'~C'
 PACKET_T_HEADER = b'~T'
+PACKET_E_HEADER = b'~E'
+PACKET_X_HEADER = b'~X'
 # Первый пакет от устройства
 PACKET_TYPE_HANDSHAKE = 'h'
 # Пакет согласования версии протокола
@@ -28,6 +44,11 @@ PACKET_TYPE_A = 'A'
 PACKET_TYPE_C = 'C'
 # Пакет внеочередного сообщения
 PACKET_TYPE_T = 'T'
+# Пакет для передачи некоторых редко изменяющихся данных (FLEX 2.0)
+PACKET_TYPE_E = 'E'
+# Дополнительный внеочередной пакет (FLEX 2.0)
+PACKET_TYPE_X = 'X'
+# Тип пакета распознать не удалось
 PACKET_TYPE_ERROR = 'e'
 
 
@@ -169,7 +190,22 @@ FIELD_CAN_FULL_ENGINE_OPERATING_TIME = 67
 FIELD_CAN_DISTANCE_TO_INSPECTION = 68
 # CAN Скорость ТС
 FIELD_CAN_VEHICLE_SPEED = 69
-
+# Информация о навигации (количество видимых спутников)
+FIELD_NAVIGATION_INFO = 70
+# HDOP/PDOP штатного приёмника
+FIELD_HDOP_PDOP = 71
+# Состояние дополнительного высокоточного навигационного приёмника
+FIELD_HIGH_PRECISION_SENSOR_STATE = 72
+# Координаты от высокоточного приёмника
+FIELD_HIGH_PRECISION_LAT_LON =73
+# Высота от высокоточного приёмника
+FIELD_HIGH_PRECISION_ALT = 74
+# Курс от высокоточного приёмника
+FIELD_HIGH_PRECISION_DIRECTION = 75
+# Скорость от высокоточного приёмника
+FIELD_HIGH_PRECISION_SPEED = 76
+# Информация о текущей базовой станции (LBS)
+FIELD_LBS_INFO = 77
 
 flex_fields = [
     {
@@ -654,6 +690,61 @@ flex_fields = [
         'bit': 0b0000_1000,
         'size': 1,
         'description': 'CAN Скорость ТС'
+    },
+    {
+        'num': FIELD_NAVIGATION_INFO,
+        'byte': 8,
+        'bit': 0b0000_0100,
+        'size': 8,
+        'description': 'Информация о навигации (количество видимых спутников)'
+    },
+    {
+        'num': FIELD_HDOP_PDOP,
+        'byte': 8,
+        'bit': 0b0000_0010,
+        'size': 2,
+        'description': 'HDOP/PDOP штатного приёмника'
+    },
+    {
+        'num': FIELD_HIGH_PRECISION_SENSOR_STATE,
+        'byte': 8,
+        'bit': 0b0000_0001,
+        'size': 1,
+        'description': 'Состояние дополнительного высокоточного навигационного приёмника',
+    },
+    {
+        'num': FIELD_HIGH_PRECISION_LAT_LON,
+        'byte': 9,
+        'bit': 0b1000_0000,
+        'size': 16,
+        'description': 'Координаты от высокоточного приёмника'
+    },
+    {
+        'num': FIELD_HIGH_PRECISION_ALT,
+        'byte': 9,
+        'bit': 0b0100_0000,
+        'size': 4,
+        'description': 'Высота от высокоточного приёмника'
+    },
+    {
+        'num': FIELD_HIGH_PRECISION_DIRECTION,
+        'byte': 9,
+        'bit': 0b0010_0000,
+        'size': 2,
+        'description': 'Курс от высокоточного приёмника'
+    },
+    {
+        'num': FIELD_HIGH_PRECISION_SPEED,
+        'byte': 9,
+        'bit': 0b0001_0000,
+        'size': 4,
+        'description': 'Скорость от высокоточного приёмника'
+    },
+    {
+        'num': FIELD_LBS_INFO,
+        'byte': 9,
+        'bit': 0b0000_1000,
+        'size': 37,
+        'description': 'Информация о текущей базовой станции (LBS)'
     }
 ]
-

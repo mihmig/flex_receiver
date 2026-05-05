@@ -134,12 +134,22 @@ CREATE TABLE gnss.geo_zone (
 );
 ALTER TABLE gnss.geo_zone COMMENT='Геозоны';
 
-ALTER TABLE gnss.monitoring ADD COLUMN with_device BOOL DEFAULT FALSE COMMENT 'Добавлять имя устройства в сообщениях';
+ALTER TABLE gnss.monitoring ADD COLUMN with_device BOOL DEFAULT FALSE COMMENT 'Добавлять имя устройства в сообщениях (если информация о нескольких устройствах отправляется в один чат)';
+--ALTER TABLE monitoring MODIFY with_device BOOL DEFAULT FALSE COMMENT 'Добавлять имя устройства в сообщениях (если информация о нескольких устройствах отправляется в один чат)';
+
 ALTER TABLE gnss.message ADD COLUMN moment TIMESTAMP NOT NULL
     COMMENT 'Дата и время регистрации события';
 
 ALTER TABLE gnss.message ADD COLUMN received TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
     COMMENT 'Дата и время получения события';
+
+INSERT INTO gnss.`settings` (`key`, value, comment) VALUES
+('message_prefix_telegram','[sverdlova-test]\n', 'Префикс, добавляемый ко всем исходящим сообщениям Telegram'),
+('message_prefix_max','[sverdlova-test]\n', 'Префикс, добавляемый ко всем исходящим сообщениям MAX')
+;
+
+INSERT INTO gnss.`settings` (`key`, value, comment) VALUES
+    ('local_port','21626', 'TCP-порт приёмника FLEX-сообщений')
 -- Круг радиусом 10 км от центра Ярославля
 # INSERT INTO gnss.geo_zone (type, center, radius) VALUES ('CIRCLE',
 #                                                          PointFromText('POINT(39.90991271972598 57.62478929076413)'),

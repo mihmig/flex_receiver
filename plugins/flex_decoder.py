@@ -2,7 +2,7 @@
 import struct
 import plugins.flex_constants as c
 
-def decode_field(field: dict, value):
+def decode_field(field: dict, value: bytes):
     match field['num']:
         case c.FIELD_EEPROM_NUMBER | c.FIELD_EVENT_CODE:
             return int.from_bytes(value, "little")
@@ -79,9 +79,50 @@ def decode_field(field: dict, value):
         case c.FIELD_SPEED | \
              c.FIELD_CURRENT_MILEAGE | \
              c.FIELD_LAST_LEG | \
-             c.FIELD_CAN_FULL_FUEL_CONSUMPTION54 | \
+             c.FIELD_CAN_FULL_FUEL_CONSUMPTION | \
              c.FIELD_CAN_FULL_VEHICLE_MILEAGE:
             return str(struct.unpack('f', value)[0])
+        case c.FIELD_NAVIGATION_INFO:
+            return {
+                "glonass": value[0],
+                "GPS": value[1]
+                # "Galileo": value[2],
+                # "Compass": value[3],
+                # "Beidou": value[4],
+                # "DORIS": value[5],
+                # "IRNSS": value[6],
+                # "QZSS": value[7]
+            }
+        case c.FIELD_LBS_INFO:
+            return {
+                "cell_id": int.from_bytes(value[0:4], "little", signed=False),
+                "lac": int.from_bytes(value[4:6], "little", signed=False),
+                "mcc": int.from_bytes(value[6:8], "little", signed=False),
+                "mnc": int.from_bytes(value[8:10], "little", signed=False),
+                "dbm": int.from_bytes(value[10:11], "little", signed=True),
+                "cell_id1": int.from_bytes(value[11:15], "little", signed=False),
+                "lac1": int.from_bytes(value[15:17], "little", signed=False),
+                "mcc1": int.from_bytes(value[17:19], "little", signed=False),
+                "mnc1": int.from_bytes(value[19:21], "little", signed=False),
+                "dbm1": int.from_bytes(value[21:22], "little", signed=True),
+                "cell_id2": int.from_bytes(value[22:26], "little", signed=False),
+                "lac2": int.from_bytes(value[26:28], "little", signed=False),
+                "mcc2": int.from_bytes(value[28:30], "little", signed=False),
+                "mnc2": int.from_bytes(value[30:32], "little", signed=False),
+                "dbm2": int.from_bytes(value[32:33], "little", signed=True),
+                "timestamp": int.from_bytes(value[33:38], "little", signed=False)
+            }
+        case c.FIELD_HDOP_PDOP:
+            return {
+               "HDOP": value[0] / 10,
+               "PDOP": value[1] / 10
+            }
+        case c.FIELD_HIGH_PRECISION_SENSOR_STATE | \
+             c.FIELD_HIGH_PRECISION_LAT_LON | \
+             c.FIELD_HIGH_PRECISION_ALT | \
+             c.FIELD_HIGH_PRECISION_DIRECTION | \
+             c.FIELD_HIGH_PRECISION_SPEED:
+            return 0 # Значения игнорируем
         case c.FIELD_CAN_FUEL_LEVEL | \
              c.FIELD_CAN_LIQUID_LEVEL_DIESEL_EXHAUST_FILTER:
             v = int.from_bytes(value, "little", signed=False)

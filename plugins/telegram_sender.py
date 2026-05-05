@@ -17,6 +17,7 @@ class TelegramSender:
     def __init__(self, storage: Storage):
         self.bot_token = storage.get_system_param('telegram_bot_token')
         self.send_message_url = 'https://api.telegram.org/bot' + self.bot_token + '/sendMessage'
+        self.prefix = storage.get_system_param('message_prefix_telegram')
 
     # Отправка сообщения в Телеграм-чат.
     @retry(retry_on_exception=retry_if_io_error, wait_exponential_multiplier=1000, wait_exponential_max=10000)
@@ -37,6 +38,9 @@ class TelegramSender:
 
 
     # Отправка сообщения в отдельном потоке, чтобы не задерживать основной
-    def send_message(self, chat_id: int, text: str, disable_notification=False):
-        Thread(target=self.send_message_with_retry, args=(chat_id, text, disable_notification)).start()
+    def send_message(self, p_chat_id: int, p_text: str, disable_notification=False):
+        text = self.prefix + p_text if self.prefix else p_text
+        Thread(target=self.send_message_with_retry, args=(p_chat_id,
+                                                          text,
+                                                          disable_notification)).start()
 

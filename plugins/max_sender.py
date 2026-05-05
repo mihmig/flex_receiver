@@ -21,14 +21,16 @@ class MaxSender:
             "Authorization": storage.get_system_param('max_bot_token'),
             "Content-Type": "application/json"
         }
+        self.prefix = storage.get_system_param('message_prefix_max')
 
 
     # Отправка сообщения в Телеграм-чат.
     @retry(retry_on_exception=retry_if_io_error, wait_exponential_multiplier=1000, wait_exponential_max=10000)
-    def send_message_with_retry(self, chat_id: int, text: str):
-        log(f'MAX: Отправляем сообщение: chat_id: {chat_id}, text: {text}')
+    def send_message_with_retry(self, p_chat_id: int, p_text: str):
+        text = self.prefix + p_text if self.prefix else p_text
+        log(f'MAX: Отправляем сообщение: chat_id: {p_chat_id}, text: {text}')
         params = {
-            "chat_id": chat_id
+            "chat_id": p_chat_id
         }
         response = requests.post(self.send_message_url,
                                  params=params,

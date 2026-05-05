@@ -8,8 +8,9 @@ import time
 
 from plugins.alert_service import AlertService
 from plugins.aquarium import Aquarium
-from plugins.flex_constants import HANDSHAKE_ANSWER, VERSION_APPROVAL_ANSWER, PACKET_C_ANSWER, PACKET_TYPE_HANDSHAKE, \
-    PACKET_TYPE_APPROVAL, PACKET_TYPE_PING, PACKET_TYPE_A, PACKET_TYPE_C, PACKET_TYPE_T, PACKET_TYPE_ERROR
+from plugins.flex_constants import HANDSHAKE_ANSWER, VERSION_APPROVAL_ANSWER_1, PACKET_C_ANSWER, PACKET_TYPE_HANDSHAKE, \
+    PACKET_TYPE_APPROVAL, PACKET_TYPE_PING, PACKET_TYPE_A, PACKET_TYPE_C, PACKET_TYPE_T, PACKET_TYPE_ERROR, \
+    PACKET_TYPE_X, PACKET_TYPE_E, VERSION_APPROVAL_ANSWER
 from plugins.logger import log
 from plugins.crc8_flex import crc8
 from plugins.consumer import Consumer
@@ -52,7 +53,7 @@ def flex_thread(local_socket, p_client_info):
 
         if packet_type == PACKET_TYPE_PING:
             consumer.consume_flex_message(imei, packet_type, None, None)
-        elif packet_type == PACKET_TYPE_A:
+        elif packet_type == PACKET_TYPE_A or packet_type == PACKET_TYPE_E:
             local_socket.send(data[0:3] + crc8(data[0:3]).to_bytes(1, "little"))
             records_count = res['records_count']
             payload = res['payload']
@@ -64,7 +65,7 @@ def flex_thread(local_socket, p_client_info):
             local_socket.send(PACKET_C_ANSWER)
             message = decode_flex_message(fields, res['payload'])
             consumer.consume_flex_message(imei, packet_type, data, message)
-        elif packet_type == PACKET_TYPE_T:
+        elif packet_type == PACKET_TYPE_T or packet_type == PACKET_TYPE_X:
             local_socket.send(data[0:6] + crc8(data[0:6]).to_bytes(1, "little"))
             message = decode_flex_message(fields, res['payload'])
             consumer.consume_flex_message(imei, packet_type, data, message)
@@ -75,7 +76,7 @@ def flex_thread(local_socket, p_client_info):
         elif packet_type == PACKET_TYPE_APPROVAL:
             fields = res['fields']
             structure_length = res['structure_length']
-            local_socket.send(VERSION_APPROVAL_ANSWER)
+            local_socket.send(VERSION_APPROVAL_ANSWER + res['protocol_version_code'] + res['struct_version_code'])
             consumer.consume_flex_message(imei, packet_type, data, res)
         elif packet_type == PACKET_TYPE_ERROR:
             if imei.isdigit():
@@ -111,7 +112,9 @@ aquarium = Aquarium(storage, alert_service)
 flex_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 flex_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 try:
-    flex_socket.bind(('0.0.0.0', LOCAL_PORT))
+    port = int(storage.get_system_param('local_port') or '21626')
+    flex_socket.bind(('0.0.0.0', port))
+    log(f'Listening on port: {port}')
 except socket.error as e:
     log(e.strerror)
     sys.exit(5)
