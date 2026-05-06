@@ -123,4 +123,44 @@ class Storage(Db):
                         ORDER BY moment
                       """,
                       [device_id, start, end])
+
+    def upsert_lbs_station(self, station: dict) -> None:
+        """
+        Создает или обновляет запись о базовой станции.
+        """
+        self.execute(
+            """INSERT INTO lbs (
+                   id, num, lat, lon, locType, bsType, bands, valid
+               )
+               VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+               ON DUPLICATE KEY UPDATE
+                   num = VALUES(num),
+                   lat = VALUES(lat),
+                   lon = VALUES(lon),
+                   locType = VALUES(locType),
+                   bsType = VALUES(bsType),
+                   bands = VALUES(bands),
+                   valid = VALUES(valid),
+                   updated = CURRENT_TIMESTAMP
+            """,
+            [
+                station['id'],
+                station['num'],
+                station['lat'],
+                station['lon'],
+                station['locType'],
+                station['bsType'],
+                station.get('bands', ''),
+                station.get('valid', True),
+            ],
+        )
+
+    def upsert_lbs_stations(self, stations: list[dict]) -> int:
+        """
+        Создает или обновляет список записей о базовых станциях.
+        :return: количество обработанных записей
+        """
+        for station in stations:
+            self.upsert_lbs_station(station)
+        return len(stations)
     

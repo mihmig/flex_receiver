@@ -1,0 +1,55 @@
+# Модуль получения данных о вышках сотовой связи
+
+# План такой:
+# Указываем центральную точку ссылкой:
+# https://yandex.com/maps/16/yaroslavl/?ll=39.891362%2C57.621132&z=14.98
+
+# По запросу к ресурсу получам список вышек 2G
+# curl 'https://4cells.ru:4444/api/map/enb/gsm/250099?latStart=57.339744878821406&latEnd=57.71997764207866&lonStart=39.43756140551525&lonEnd=40.26178621322406' \
+#   -H 'accept: application/json, text/plain, */*' \
+#   -H 'accept-language: ru-RU,ru;q=0.5' \
+#   -H 'origin: https://4cells.ru' \
+#   -H 'priority: u=1, i' \
+#   -H 'referer: https://4cells.ru/' \
+#   -H 'sec-ch-ua: "Brave";v="147", "Not.A/Brand";v="8", "Chromium";v="147"' \
+#   -H 'sec-ch-ua-mobile: ?0' \
+#   -H 'sec-ch-ua-platform: "Windows"' \
+#   -H 'sec-fetch-dest: empty' \
+#   -H 'sec-fetch-mode: cors' \
+#   -H 'sec-fetch-site: same-site' \
+#   -H 'sec-gpc: 1' \
+#   -H 'user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36' \
+#   -H 'x-request-id: bbafbf6a37d03ba724d3000aa9d3b07dd0e230aef670fc9bba488ed97182b0a0'
+# также 3G
+
+
+# Получаем такой JSON
+[
+    {
+        "id": 2500994267628,
+        "num": 28,
+        "lat": 57.6373,
+        "lon": 39.8394,
+        "locType": 1,
+        "bsType": 0,
+        "bands": "B1800"
+    },
+    {
+        "id": 250099425762296,
+        "num": 2296,
+        "lat": 57.687813,
+        "lon": 39.78702,
+        "locType": 1,
+        "bsType": 0,
+        "bands": "B1800"
+    },
+    {
+        "id": 25009942676502,
+        "num": 502,
+        "lat": 57.668026,
+        "lon": 39.92688,
+        "locType": 1,
+        "bsType": 0,
+        "bands": "B900"
+    }
+]
