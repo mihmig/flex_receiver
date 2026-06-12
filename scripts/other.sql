@@ -16,7 +16,7 @@ ORDER BY hour_interval;
 -- Очищаем таблицу от записей ботов (как они туда попадают?)
 DELETE FROM message WHERE device_id=6;
 -- Очищаем таблицу message от записей старше 2-х недель
-DELETE FROM message WHERE device_id=8 AND datetime < NOW() - INTERVAL 14 DAY;
+DELETE FROM message WHERE device_id IN (4,8) AND datetime < NOW() - INTERVAL 14 DAY;
 
 -- Список пользователей БД
 SELECT User, Host, Password FROM mysql.user;
