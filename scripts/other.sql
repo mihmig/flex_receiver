@@ -49,7 +49,6 @@ ALTER TABLE monitoring ADD COLUMN `max_chat_id` BIGINT COMMENT 'ID МАКС-ча
 UPDATE monitoring SET telegram_chat_id=chat_id;
 UPDATE monitoring SET alert = true;
 
-
 -- Матиз - Онлайн
 UPDATE device SET device.last_alive = now() WHERE device.imei='862531045630978';
 -- Матиз - Офлайн
@@ -59,3 +58,11 @@ UPDATE device SET device.last_alive = DATE_SUB(now(), INTERVAL 1 DAY) WHERE devi
 UPDATE monitoring SET `datetime` = now() WHERE device_id = 1;
 -- Матиз - датчики - ОФЛАЙН
 UPDATE monitoring SET `datetime` = DATE_SUB(now(), INTERVAL 2 HOUR ) WHERE device_id = 1;
+
+
+-- Временно (при переносе БД на другой стенд) отключаем уведомления
+UPDATE device SET alert = 0 WHERE id IN (4,8);
+UPDATE monitoring SET alert = 0;
+-- Включаем уведомления обратно
+UPDATE device SET alert = 1 WHERE id IN (4,8);
+UPDATE monitoring SET alert = 1;
