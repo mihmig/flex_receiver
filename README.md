@@ -150,3 +150,13 @@ PYTHONUNBUFFERED=1;DATABASE_HOST=localhost;DATABASE_PORT=8003;DATABASE_NAME=gnss
 * 12 Высота относительно уровня моря, зафиксированная при получении последних валидных координат: В дециметрах Например, 205 метров будет представлено как 2050 дециметров
 * 13 Скорость, зафиксированная при получении последних валидных координат. В км/ч
 * 14 Курс, зафиксированный при получении последних валидных координат.
+
+### SQL-запросы
+``` sql
+-- Круг радиусом 10 км от центра Ярославля
+INSERT INTO gnss.geo_zone (type, center, radius) VALUES ('CIRCLE',
+                                                         PointFromText('POINT(39.90991271972598 57.62478929076413)'),
+                                                         10000);
+
+SELECT ST_AsText(center), ST_X(center), ST_Y(center) FROM gnss.geo_zone WHERE id = 2;
+```
