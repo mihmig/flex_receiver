@@ -24,7 +24,7 @@ class MaxSender:
         self.prefix = storage.get_system_param('message_prefix_max')
 
 
-    # Отправка сообщения в Телеграм-чат.
+    # Отправка сообщения в MAX-чат.
     @retry(retry_on_exception=retry_if_io_error, wait_exponential_multiplier=1000, wait_exponential_max=10000)
     def send_message_with_retry(self, p_chat_id: int, p_text: str):
         text = self.prefix + p_text if self.prefix else p_text

@@ -12,17 +12,17 @@ import re
 from datetime import datetime
 
 from plugins.models import GpsPoint, GpxFileInfo, ConvertRecordsResult
-from plugins.spoofing_zone_filter import SpoofingZoneFilter
+from plugins.geofences_service import GeofenceService
 from plugins.storage import Storage
 
 class GpxExporter():
     def __init__(self,
                  p_storage: Storage,
-                 p_spoofing_zone_filter: SpoofingZoneFilter,
-                 p_tracks_folder: str = 'tracks'):
+                 geofence_service: GeofenceService,
+                 tracks_folder: str = 'tracks'):
         self.storage = p_storage
-        self.spoofing_zone_filter = p_spoofing_zone_filter
-        self.tracks_folder = p_tracks_folder
+        self.spoofing_zone_filter = geofence_service
+        self.tracks_folder = tracks_folder
 
     @staticmethod
     def to_gpx_time(value: int) -> str:
@@ -91,7 +91,7 @@ class GpxExporter():
             lat = float(data.get("10")) / 600000
             lon = float(data.get("11")) / 600000
             # Точка в spoofing-зоне
-            if spoofing_zone_filter.point_in_spoofed_zone(lon, lat):
+            if geofences_service.point_in_spoofed_zone(lon, lat):
                 # db.execute("DELETE FROM message WHERE id = %s", [record['id']])
                 spoofed += 1
                 continue
@@ -197,12 +197,12 @@ class GpxExporter():
 
 
 if __name__ == '__main__':
-    device_id = 1
-    date = '2026-05-04'
+    device_id = 9
+    date = '2026-05-06'
 
     storage = Storage()
-    spoofing_zone_filter = SpoofingZoneFilter(storage)
-    gpx_exporter = GpxExporter(storage, spoofing_zone_filter)
+    geofences_service = GeofenceService(storage)
+    gpx_exporter = GpxExporter(storage, geofences_service)
     gpx_file_info: GpxFileInfo = gpx_exporter.create_gpx_file(device_id, date)
     print(f'Создан трек: {gpx_file_info.full_path}')
     print(f'Точек с невалидной навигацией: {gpx_file_info.invalid_gps_records}')

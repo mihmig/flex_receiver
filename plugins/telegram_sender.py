@@ -20,7 +20,12 @@ class TelegramSender:
         self.prefix = storage.get_system_param('message_prefix_telegram')
 
     # Отправка сообщения в Телеграм-чат.
-    @retry(retry_on_exception=retry_if_io_error, wait_exponential_multiplier=1000, wait_exponential_max=10000)
+    @retry(retry_on_exception=retry_if_io_error,
+           wait_exponential_multiplier=1000,
+           wait_exponential_max=10000,
+           stop_max_attempt_number = 3,
+           stop_max_delay = 60000
+    )
     def send_message_with_retry(self, chat_id: int, text: str, disable_notification=False):
         log(f'TELEGRAM: Отправляем сообщение: chat_id: {chat_id}, text: {text}')
         request = {

@@ -4,7 +4,7 @@ from datetime import datetime
 from plugins.flex_constants import PACKET_TYPE_HANDSHAKE, PACKET_TYPE_APPROVAL, PACKET_TYPE_PING, PACKET_TYPE_A, \
     PACKET_TYPE_C, PACKET_TYPE_T, PACKET_TYPE_ERROR
 from plugins.monitoring_service import MonitoringService
-from plugins.spoofing_zone_filter import SpoofingZoneFilter
+from plugins.geofences_service import GeofenceService
 from plugins.storage import Storage
 from plugins.logger import log
 
@@ -16,7 +16,7 @@ class Consumer:
     def __init__(self,
                  p_storage: Storage,
                  p_monitoring_service: MonitoringService,
-                 p_spoofing_zone_filter: SpoofingZoneFilter
+                 p_spoofing_zone_filter: GeofenceService
                  ):
         self.storage = p_storage
         self.monitoring_service = p_monitoring_service
@@ -59,7 +59,7 @@ class Consumer:
         elif packet_type == PACKET_TYPE_A or packet_type == PACKET_TYPE_C or packet_type == PACKET_TYPE_T:
             self.storage.update_last_alive(device_id)
             self.debug_message(imei, packet_type, decoded)
-            if not self.gnss_valid(decoded):
+            if '9' in decoded and not self.gnss_valid(decoded):  # Если координаты есть - проверяем их валидность
                 log(f'{imei}: spoofed/invalid')
                 # Удаляем ключи (они всё равно невалидны)
                 for key in GNSS_KEYS:

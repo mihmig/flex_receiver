@@ -19,7 +19,7 @@ from plugins.constants import *
 from plugins.packet_decoder import decode_packet, decode_flex_message
 from plugins.max_sender import MaxSender
 from plugins.monitoring_service import MonitoringService
-from plugins.spoofing_zone_filter import SpoofingZoneFilter
+from plugins.geofences_service import GeofenceService
 from plugins.storage import Storage
 from plugins.telegram_sender import TelegramSender
 from plugins.timeout_checker import Checker
@@ -103,7 +103,7 @@ telegram_sender = TelegramSender(storage)
 max_sender = MaxSender(storage)
 alert_service = AlertService(storage, telegram_sender, max_sender)
 monitoring_service = MonitoringService(storage, alert_service)
-spoofing_zone_filter = SpoofingZoneFilter(storage)
+spoofing_zone_filter = GeofenceService(storage)
 consumer = Consumer(storage, monitoring_service, spoofing_zone_filter)
 
 checker = Checker(storage, alert_service)

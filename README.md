@@ -120,15 +120,19 @@ DO
 
 ### Запуск локально
 #### Настройка python
+``` bash
 cd /opt/flex_receiver/
 apt install python3.11-venv
 python3 -m venv .venv
 source .venv/bin/activate
 pip3 install -r requirements.txt
+```
+``` bash
 PYTHONPATH=. PYTHONUNBUFFERED=1 \
 DATABASE_HOST=localhost DATABASE_PORT=8003 \
 DATABASE_NAME=gnss DATABASE_USER=gnss DATABASE_PASSWORD=gnss \
 python3 test/geozones/test_import_from_axenta.py
+```
 ### Обслуживание
 
 
@@ -138,3 +142,13 @@ python3 test/geozones/test_import_from_axenta.py
 * Исключать из треков "топтание на месте"
 * При появлении нового устройства сохранять все передавыаемые параметры в таблицу monitoring (alert = 0)
 * Чаты брать из таблицы device для этого устройства
+
+
+#### snippets
+``` python
+import geopy.distance
+
+coords_1 = (57.695241, 39.791827)
+coords_2 = (57.602581, 39.576598)
+print(geopy.distance.geodesic(coords_1, coords_2).m)
+```

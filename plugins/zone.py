@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 # Геозоны
 from shapely.geometry import Polygon
 
@@ -9,6 +11,8 @@ class Zone:
     name: str
     tags: str
     alert: bool
+    childrens: list[Zone]
+    
 
 class CircleZone(Zone):
     lat: float
