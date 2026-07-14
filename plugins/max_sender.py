@@ -25,7 +25,12 @@ class MaxSender:
 
 
     # Отправка сообщения в MAX-чат.
-    @retry(retry_on_exception=retry_if_io_error, wait_exponential_multiplier=1000, wait_exponential_max=10000)
+    @retry(retry_on_exception=retry_if_io_error,
+           wait_exponential_multiplier=1000,
+           wait_exponential_max=10000,
+           stop_max_attempt_number=3,
+           stop_max_delay=60000
+           )
     def send_message_with_retry(self, p_chat_id: int, p_text: str):
         text = self.prefix + p_text if self.prefix else p_text
         log(f'MAX: Отправляем сообщение: chat_id: {p_chat_id}, text: {text}')
