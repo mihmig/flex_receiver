@@ -17,6 +17,21 @@ SELECT id, message_type, decoded
                         AND decoded IS NOT NULL
                         AND moment BETWEEN '2026-04-30 00:00:00' and '2026-04-30 23:59:59'
                         ORDER BY moment;
+
+
+-- SQL‑запрос для подсчёта количества записей в таблице message за указанный период с группировкой по часам:
+-- docker logs --since "2026-04-26T05:00:00" --until "2026-04-26T09:00:00" flex
+SELECT
+    DATE_FORMAT(`datetime`, '%Y-%m-%d %H:00:00') AS hour_interval,
+    COUNT(*) AS message_count
+FROM `message`
+WHERE device_id = 8
+  AND `datetime` >= '2026-04-26 05:00:00'
+  AND `datetime` < '2026-04-26 10:00:00'
+GROUP BY DATE_FORMAT(`datetime`, '%Y-%m-%d %H')
+ORDER BY hour_interval;
+
+
 -- Очищаем таблицу от записей ботов (как они туда попадают?)
 DELETE FROM message WHERE device_id=6;
 -- Очищаем таблицу message от записей старше 2-х недель
@@ -53,7 +68,6 @@ ALTER TABLE monitoring ADD COLUMN `max_chat_id` BIGINT COMMENT 'ID МАКС-ча
 UPDATE monitoring SET telegram_chat_id=chat_id;
 UPDATE monitoring SET alert = true;
 
-
 -- Матиз - Онлайн
 UPDATE device SET device.last_alive = now() WHERE device.imei='862531045630978';
 -- Матиз - Офлайн
@@ -63,3 +77,11 @@ UPDATE device SET device.last_alive = DATE_SUB(now(), INTERVAL 1 DAY) WHERE devi
 UPDATE monitoring SET `datetime` = now() WHERE device_id = 1;
 -- Матиз - датчики - ОФЛАЙН
 UPDATE monitoring SET `datetime` = DATE_SUB(now(), INTERVAL 2 HOUR ) WHERE device_id = 1;
+
+
+-- Временно (при переносе БД на другой стенд) отключаем уведомления
+UPDATE device SET alert = 0 WHERE id IN (4,8);
+UPDATE monitoring SET alert = 0;
+-- Включаем уведомления обратно
+UPDATE device SET alert = 1 WHERE id IN (4,8);
+UPDATE monitoring SET alert = 1;

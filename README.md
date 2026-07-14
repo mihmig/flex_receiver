@@ -78,7 +78,7 @@ docker-compose up -d --build flex
 * docker exec flex-db /bin/bash -c 'mariadb-dump gnss -p$MYSQL_ROOT_PASSWORD >/backup/gnss.sql'
 
 ### Восстановление
-* docker exec flex-db /bin/bash -c 'mariadb gnss -p$MYSQL_ROOT_PASSWORD </backup/gnss.sql'
+* docker exec flex-db /bin/bash -c 'mariadb gnss -p\$MYSQL_ROOT_PASSWORD </backup/gnss.sql'
 * Для windows 
   * docker exec flex-db /bin/bash -c "mariadb gnss -p$MYSQL_ROOT_PASSWORD </backup/gnss.sql"
 
@@ -118,31 +118,30 @@ DO
 3. Проверить уведомления о долгом отсутствии связи. Предлагаю сделать критичным интервал 4 часа и вернуть уведомления об этом
 4. Нужно после восстановления связи п.3 передавать внеплановое стандартное сообщение о текущем состоянии параметров 
 
+
+1. Если параметр вышел за пределы и прошло более 30 минут
+2. И время, когда параметр был в норме больше 30 минут 
+То:
+1. Ставим статус "alert!"
+2. Уведомляем
+
+
+1. Если параметр "вошёл" в норму:
+2. Текущий статус "alert!"
+3. Время, когда он был "не в норме" - более 30 минут
+То:
+1. Снимаем статус "alert"
+2. Уведомляем о возврате параметра в норму
+
 ### Запуск локально
-#### Настройка python
-``` bash
-cd /opt/flex_receiver/
-apt install python3.11-venv
-python3 -m venv .venv
-source .venv/bin/activate
-pip3 install -r requirements.txt
-```
-``` bash
-PYTHONPATH=. PYTHONUNBUFFERED=1 \
-DATABASE_HOST=localhost DATABASE_PORT=8003 \
-DATABASE_NAME=gnss DATABASE_USER=gnss DATABASE_PASSWORD=gnss \
-python3 test/geozones/test_import_from_axenta.py
-```
+PYTHONUNBUFFERED=1;DATABASE_HOST=localhost;DATABASE_PORT=8003;DATABASE_NAME=gnss;DATABASE_USER=gnss;DATABASE_PASSWORD=gnss
+
+
 ### Обслуживание
 
 
 
-#### TODO
-* Округлить скорость до 1 знака до запятой
-* Исключать из треков "топтание на месте"
-* При появлении нового устройства сохранять все передавыаемые параметры в таблицу monitoring (alert = 0)
-* Чаты брать из таблицы device для этого устройства
-
+### Передаваемые параметры
 
 #### snippets
 ``` python
@@ -151,4 +150,21 @@ import geopy.distance
 coords_1 = (57.695241, 39.791827)
 coords_2 = (57.602581, 39.576598)
 print(geopy.distance.geodesic(coords_1, coords_2).m)
+```
+* 10 Последняя валидная широта Угол широты, зафиксированный при получении последних валидных координат. В десятитысячных долях минуты.
+* Например, 55° 42,2389' будет представлено как 33422389
+* 11 Угол долготы, зафиксированный при получении последних валидных координат. В десятитысячных долях минуты.
+* Например, 37° 41,6063' будет представлено как 22616063
+* 12 Высота относительно уровня моря, зафиксированная при получении последних валидных координат: В дециметрах Например, 205 метров будет представлено как 2050 дециметров
+* 13 Скорость, зафиксированная при получении последних валидных координат. В км/ч
+* 14 Курс, зафиксированный при получении последних валидных координат.
+
+### SQL-запросы
+``` sql
+-- Круг радиусом 10 км от центра Ярославля
+INSERT INTO gnss.geo_zone (type, center, radius) VALUES ('CIRCLE',
+                                                         PointFromText('POINT(39.90991271972598 57.62478929076413)'),
+                                                         10000);
+
+SELECT ST_AsText(center), ST_X(center), ST_Y(center) FROM gnss.geo_zone WHERE id = 2;
 ```
